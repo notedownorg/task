@@ -15,19 +15,42 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
+	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
+	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/spf13/cobra"
-)
+	"github.com/spf13/viper"
 
-var cfgFile string
+	"github.com/notedownorg/task/pkg/models/workspace"
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "task",
 	Short: "A task management CLI & TUI for your Notedown notes",
 	Run: func(cmd *cobra.Command, args []string) {
-		panic("TUI not implemented yet")
+		cfg := loadConfig()
+
+		reader, err := reader.NewClient(cfg.root, "task")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		writer := writer.NewClient(cfg.root)
+
+		tasksClient := tasks.NewClient(writer, reader.Subscribe())
+
+		ws := workspace.New(tasksClient)
+
+		p := tea.NewProgram(ws, tea.WithAltScreen())
+		if _, err := p.Run(); err != nil {
+			fmt.Println("Error running program:", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -41,30 +64,26 @@ func Execute() {
 }
 
 func init() {
-	// cobra.OnInitialize(initConfig)
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.task.yaml)")
+	cobra.OnInitialize(initConfig)
+}
+
+type config struct {
+	root string
+}
+
+func loadConfig() config {
+	cfg := config{}
+	cfg.root = viper.GetString("dir")
+	if cfg.root == "" {
+		fmt.Println("Please set NOTEDOWN_DIR environment variable to the root of your Notedown workspace")
+		os.Exit(1)
+	}
+	return cfg
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// if cfgFile != "" {
-	// 	// Use config file from the flag.
-	// 	viper.SetConfigFile(cfgFile)
-	// } else {
-	// 	// Find home directory.
-	// 	home, err := os.UserHomeDir()
-	// 	cobra.CheckErr(err)
-	//
-	// 	// Search config in home directory with name ".task" (without extension).
-	// 	viper.AddConfigPath(home)
-	// 	viper.SetConfigType("yaml")
-	// 	viper.SetConfigName(".task")
-	// }
-	//
-	// viper.AutomaticEnv() // read in environment variables that match
-	//
-	// // If a config file is found, read it in.
-	// if err := viper.ReadInConfig(); err == nil {
-	// 	fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	// }
+	viper.SetEnvPrefix("notedown")
+	viper.BindEnv("dir")
+	viper.AutomaticEnv() // read in environment variables that match
 }
