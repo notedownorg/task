@@ -4,7 +4,7 @@ go 1.22.7
 
 require (
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1
-	github.com/notedownorg/notedown v0.0.0-20241021200009-a6ff2ec9b447
+	github.com/notedownorg/notedown v0.0.0-20241023112650-f86edac9645c
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )

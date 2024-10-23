@@ -16,7 +16,9 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
@@ -35,17 +37,32 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := loadConfig()
 
-		reader, err := reader.NewClient(cfg.root, "task")
+		// Configure logging to a file
+		// logFileLocation := path.Join(cfg.root, "debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
+		logFileLocation := "task.log"
+		logFile, err := os.OpenFile(logFileLocation, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			fmt.Println("Error opening log file:", err)
+			os.Exit(1)
+		}
+		defer logFile.Close()
+		slog.SetDefault(slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug})))
+
+		// Configure workspace reader/writer
+		read, err := reader.NewClient(cfg.root, "task")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		writer := writer.NewClient(cfg.root)
+		write := writer.NewClient(cfg.root)
 
-		tasksClient := tasks.NewClient(writer, reader.Subscribe())
+		// Configure the task client
+		sub := make(chan reader.Event)
+		read.Subscribe(sub, reader.WithInitialDocuments())
+		tasksClient := tasks.NewClient(write, sub, tasks.WithInitialLoadWaiter(100*time.Millisecond))
 
+		// Create the initial model and run the program
 		ws := workspace.New(tasksClient)
-
 		p := tea.NewProgram(ws, tea.WithAltScreen())
 		if _, err := p.Run(); err != nil {
 			fmt.Println("Error running program:", err)
