@@ -27,7 +27,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/notedownorg/task/pkg/models/workspace"
+	"github.com/notedownorg/task/pkg/context"
+	"github.com/notedownorg/task/pkg/themes"
+	"github.com/notedownorg/task/pkg/views/agenda"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -62,8 +64,10 @@ var rootCmd = &cobra.Command{
 		tasksClient := tasks.NewClient(write, sub, tasks.WithInitialLoadWaiter(100*time.Millisecond))
 
 		// Create the initial model and run the program
-		ws := workspace.New(tasksClient)
-		p := tea.NewProgram(ws, tea.WithAltScreen())
+		ctx := &context.ProgramContext{Theme: themes.CatpuccinMocha}
+		agenda := agenda.New(ctx, tasksClient)
+
+		p := tea.NewProgram(agenda, tea.WithAltScreen())
 		if _, err := p.Run(); err != nil {
 			fmt.Println("Error running program:", err)
 			os.Exit(1)

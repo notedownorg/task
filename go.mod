@@ -4,7 +4,8 @@ go 1.22.7
 
 require (
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1
-	github.com/notedownorg/notedown v0.0.0-20241023112650-f86edac9645c
+	github.com/charmbracelet/lipgloss v0.13.1
+	github.com/notedownorg/notedown v0.0.0-20241024162042-9947b40c6bcb
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )
@@ -12,7 +13,6 @@ require (
 require (
 	github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/charmbracelet/lipgloss v0.13.0 // indirect
 	github.com/charmbracelet/x/ansi v0.3.2 // indirect
 	github.com/charmbracelet/x/term v0.2.0 // indirect
 	github.com/charmbracelet/x/windows v0.2.0 // indirect
