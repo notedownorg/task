@@ -12,44 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package workspace
+package context
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/task/pkg/themes"
 )
 
-var _ tea.Model = &Model{}
+// ProgramContext is responsible for managing "global" state and actions for the program.
+// This includes things like the theme, screen dimensions and exiting.
+type ProgramContext struct {
+	Theme themes.Theme
 
-func New(tasks *tasks.Client) *Model {
-	return &Model{
-		tasks: tasks,
-	}
+	ScreenHeight int
+	ScreenWidth  int
 }
 
-type Model struct {
-	tasks *tasks.Client
+func (c *ProgramContext) Init() (tea.Model, tea.Cmd) {
+	return c, nil
 }
 
-func (m *Model) Init() (tea.Model, tea.Cmd) {
-	return m, nil
+func (c *ProgramContext) View() string {
+	return ""
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (c *ProgramContext) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "esc", "ctrl+c":
-			return m, tea.Quit
+		case "q", "ctrl+c":
+			return c, tea.Quit
 		}
+	case tea.WindowSizeMsg:
+		c.onWindowResize(msg)
 	}
-
-	return m, nil
+	return c, nil
 }
 
-func (m *Model) View() string {
-	allTasks, _ := m.tasks.ListTasks(tasks.FetchAllTasks())
-	return fmt.Sprintf("%d tasks loaded", len(allTasks))
+func (c *ProgramContext) onWindowResize(msg tea.WindowSizeMsg) {
+	c.ScreenHeight = msg.Height
+	c.ScreenWidth = msg.Width
 }
