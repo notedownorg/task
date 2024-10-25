@@ -26,12 +26,26 @@ import (
 	"github.com/notedownorg/task/pkg/themes"
 )
 
-func viewStyle(theme themes.Theme) lipgloss.Style {
-	return lipgloss.NewStyle().
-		Foreground(theme.TextCursor).
-		Background(theme.Green).
-		Bold(true).
-		Padding(0, 1)
+func modeStyle(mode Mode) func(themes.Theme) lipgloss.Style {
+	return func(theme themes.Theme) lipgloss.Style {
+		background := func() lipgloss.Color {
+			switch mode.action {
+			case ActionCreate:
+				return theme.Green
+			case ActionEdit:
+				return theme.Yellow
+			case ActionDelete:
+				return theme.Red
+			default:
+				return theme.Blue
+			}
+		}()
+		return lipgloss.NewStyle().
+			Foreground(theme.TextCursor).
+			Background(background).
+			Bold(true).
+			Padding(0, 1)
+	}
 }
 
 func textStyle(theme themes.Theme) lipgloss.Style {
@@ -51,13 +65,14 @@ type Model struct {
 
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
-	view  string
+
+	mode Mode
 }
 
-func New(ctx *context.ProgramContext, view string, t *tasks.Client) *Model {
+func New(ctx *context.ProgramContext, mode Mode, t *tasks.Client) *Model {
 	return &Model{
 		ctx:   ctx,
-		view:  view,
+		mode:  mode,
 		tasks: t,
 	}
 }
@@ -88,14 +103,14 @@ func (m *Model) View() string {
 	)
 
 	statsBlock := statsStyle(m.ctx.Theme).Render(stats)
-	viewBlock := viewStyle(m.ctx.Theme).Render(strings.ToUpper(m.view))
+	modeBlock := modeStyle(m.mode)(m.ctx.Theme).Render(strings.ToUpper(m.mode.text))
 
 	w := lipgloss.Width
-	statusBlockWidth := m.base.AvailableWidth() - w(statsBlock) - w(viewBlock)
+	statusBlockWidth := m.base.AvailableWidth() - w(statsBlock) - w(modeBlock)
 	statusBlock := textStyle(m.ctx.Theme).Width(statusBlockWidth).Render("")
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
-		viewBlock,
+		modeBlock,
 		statusBlock,
 		statsBlock,
 	)
