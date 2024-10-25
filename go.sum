@@ -51,8 +51,8 @@ github.com/muesli/cancelreader v0.2.2 h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELU
 github.com/muesli/cancelreader v0.2.2/go.mod h1:3XuTXfFS2VjM+HTLZY9Ak0l6eUKfijIfMUZ4EgX0QYo=
 github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo=
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
-github.com/notedownorg/notedown v0.0.0-20241024162042-9947b40c6bcb h1:yF4ofVFkjTZ0u61Fg8EzBNtsmkRCfP05q9Wt5wMW0s0=
-github.com/notedownorg/notedown v0.0.0-20241024162042-9947b40c6bcb/go.mod h1:gtN8pq5eQ9K9FYYxX5Uk0BrRLFW1u85peUNbmp5RNuo=
+github.com/notedownorg/notedown v0.0.0-20241025153823-1a190f8137bf h1:ZC+SJ2vnOzItVUd5zR8c+7CV6pFsPsPA03bTjPwxFrQ=
+github.com/notedownorg/notedown v0.0.0-20241025153823-1a190f8137bf/go.mod h1:gtN8pq5eQ9K9FYYxX5Uk0BrRLFW1u85peUNbmp5RNuo=
 github.com/otiai10/copy v1.14.0 h1:dCI/t1iTdYGtkvCuBG2BgR6KZa83PTclw4U5n2wAllU=
 github.com/otiai10/copy v1.14.0/go.mod h1:ECfuL02W+/FkTWZWgQqXPWZgW9oeKCSQ5qVfSc4qc4w=
 github.com/pelletier/go-toml/v2 v2.2.2 h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6Wq+LM=

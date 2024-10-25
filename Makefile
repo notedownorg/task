@@ -26,5 +26,8 @@ format: licenser
 test:
 	go test -v ./...
 
+dev:
+	NOTEDOWN_DIR=$(shell pwd)/workspace go run main.go
+
 licenser:
 	licenser apply -r "Notedown Authors"
