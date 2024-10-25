@@ -26,6 +26,9 @@ type ProgramContext struct {
 
 	ScreenHeight int
 	ScreenWidth  int
+
+	// History is a stack of views that the user has navigated through.
+	History History
 }
 
 func (c *ProgramContext) Init() (tea.Model, tea.Cmd) {
@@ -42,11 +45,26 @@ func (c *ProgramContext) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return c, tea.Quit
+		case "esc":
+			return c.Back()
 		}
 	case tea.WindowSizeMsg:
 		c.onWindowResize(msg)
 	}
-	return c, nil
+	return nil, nil
+}
+
+func (c *ProgramContext) Back() (tea.Model, tea.Cmd) {
+	if m, ok := c.History.Pop(); ok {
+		return m, nil
+	}
+	// Return nil if there is no history to go back to.
+	return nil, nil
+}
+
+func (c *ProgramContext) Navigate(curr, next tea.Model) (tea.Model, tea.Cmd) {
+	c.History.Push(curr)
+	return next, nil
 }
 
 func (c *ProgramContext) onWindowResize(msg tea.WindowSizeMsg) {

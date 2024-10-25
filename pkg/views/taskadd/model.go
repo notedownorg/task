@@ -12,46 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package agenda
+package taskadd
 
 import (
-	"time"
-
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
-	"github.com/notedownorg/task/pkg/components/tasklist"
 	"github.com/notedownorg/task/pkg/context"
-	"github.com/notedownorg/task/pkg/views/taskadd"
 )
-
-const (
-	view = "agenda"
-)
-
-func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
-	return &Model{
-		ctx:   ctx,
-		tasks: t,
-		date:  time.Now(),
-
-		keyMap:   DefaultKeyMap,
-		tasklist: tasklist.New(ctx, t),
-		footer:   statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
-	}
-}
 
 type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
-	date  time.Time
 
-	keyMap KeyMap
+	footer *statusbar.Model
+}
 
-	tasklist *tasklist.Model
-	footer   *statusbar.Model
+func NewModel(ctx *context.ProgramContext, t *tasks.Client) *Model {
+	return &Model{
+		ctx:   ctx,
+		tasks: t,
+
+		footer: statusbar.New(ctx, statusbar.NewMode("add task", statusbar.ActionCreate), t),
+	}
 }
 
 func (m *Model) Init() (tea.Model, tea.Cmd) {
@@ -61,22 +45,15 @@ func (m *Model) Init() (tea.Model, tea.Cmd) {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Handle program level key presses and events
 	model, cmd := m.ctx.Update(msg)
+
+	// If model is not nil, we're navigating back to the previous view
 	if model != nil {
-		return model, cmd // If model is not nil, we're navigating back to the previous view
+		return model, cmd
 	}
 
 	// Handle view level key presses
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keyMap.AddTask):
-			return m.ctx.Navigate(m, taskadd.NewModel(m.ctx, m.tasks))
-		}
-	}
 
 	// Handle component events
-	tl, _ := m.tasklist.Update(msg)
-	m.tasklist = tl.(*tasklist.Model)
 
 	return m, cmd
 }
@@ -84,20 +61,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) View() string {
 	horizontalPadding := 2
 	verticalMargin := 1
-	h := lipgloss.Height
 
 	footer := m.footer.
 		Width(m.ctx.ScreenWidth-horizontalPadding*2).
 		Margin(verticalMargin, 0).
 		View()
 
-	tasklist := m.tasklist.
-		Height(m.ctx.ScreenHeight-h(footer)-verticalMargin*2).
-		Width(m.ctx.ScreenWidth).
-		Margin(verticalMargin, 0).
-		View()
-
-	panel := lipgloss.JoinVertical(lipgloss.Top, tasklist, footer)
+	panel := lipgloss.JoinVertical(lipgloss.Top, footer)
 
 	return lipgloss.NewStyle().Padding(0, horizontalPadding).Render(panel)
 }
