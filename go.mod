@@ -3,6 +3,7 @@ module github.com/notedownorg/task
 go 1.22.7
 
 require (
+	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1
 	github.com/charmbracelet/lipgloss v0.13.1
 	github.com/notedownorg/notedown v0.0.0-20241024162042-9947b40c6bcb
