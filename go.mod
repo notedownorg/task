@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1
 	github.com/charmbracelet/lipgloss v0.13.1
-	github.com/notedownorg/notedown v0.0.0-20241024162042-9947b40c6bcb
+	github.com/notedownorg/notedown v0.0.0-20241025153823-1a190f8137bf
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )
