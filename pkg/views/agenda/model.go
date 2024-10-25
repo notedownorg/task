@@ -18,9 +18,18 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
+	"github.com/notedownorg/task/pkg/components/tasklist"
 	"github.com/notedownorg/task/pkg/context"
+)
+
+type Mode string
+
+const (
+	navigate   Mode = "navigate"
+	editStatus Mode = "edit status"
 )
 
 func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
@@ -28,6 +37,9 @@ func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
 		ctx:   ctx,
 		tasks: t,
 		date:  time.Now(),
+
+		tasklist: tasklist.New(ctx, t),
+		footer:   statusbar.New(ctx, string(navigate), t),
 	}
 }
 
@@ -35,6 +47,10 @@ type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
 	date  time.Time
+	mode  Mode
+
+	tasklist *tasklist.Model
+	footer   *statusbar.Model
 }
 
 func (m *Model) Init() (tea.Model, tea.Cmd) {
@@ -44,14 +60,31 @@ func (m *Model) Init() (tea.Model, tea.Cmd) {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	ctx, cmd := m.ctx.Update(msg)
 	m.ctx = ctx.(*context.ProgramContext)
+
+	// Send to tasklist
+	tl, _ := m.tasklist.Update(msg)
+	m.tasklist = tl.(*tasklist.Model)
+
 	return m, cmd
 }
 
 func (m *Model) View() string {
-	stats := statusbar.Stats{
-		Tasks:     len(m.tasks.ListTasks(tasks.FetchAllTasks())),
-		Projects:  len(m.tasks.ListDocuments(tasks.FetchAllDocuments(), tasks.FilterByDocumentType("project"))),
-		Documents: len(m.tasks.ListDocuments(tasks.FetchAllDocuments())),
-	}
-	return statusbar.Render(m.ctx, "agenda", stats)
+	horizontalPadding := 2
+	verticalMargin := 1
+	h := lipgloss.Height
+
+	footer := m.footer.
+		Width(m.ctx.ScreenWidth-horizontalPadding*2).
+		Margin(verticalMargin, 0).
+		View()
+
+	tasklist := m.tasklist.
+		Height(m.ctx.ScreenHeight-h(footer)-verticalMargin*2).
+		Width(m.ctx.ScreenWidth).
+		Margin(verticalMargin, 0).
+		View()
+
+	panel := lipgloss.JoinVertical(lipgloss.Top, tasklist, footer)
+
+	return lipgloss.NewStyle().Padding(0, horizontalPadding).Render(panel)
 }
