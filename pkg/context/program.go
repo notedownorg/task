@@ -29,10 +29,25 @@ type ProgramContext struct {
 
 	// History is a stack of views that the user has navigated through.
 	History History
+
+	// Listeners are a group of subscribers that will be sent every message and optionally respond with a command.
+	// Examples might include a timer or an event listener that trigger re-renders.
+	// tea.Model Update is intentionally not used here as we don't want listeners to be able to change the model.
+	Listeners Listeners
+}
+
+type ProgramContextOption func(*ProgramContext)
+
+func New(theme themes.Theme, opts ...ProgramContextOption) *ProgramContext {
+	p := &ProgramContext{Theme: theme}
+	for _, opt := range opts {
+		opt(p)
+	}
+	return p
 }
 
 func (c *ProgramContext) Init() (tea.Model, tea.Cmd) {
-	return c, nil
+	return c, c.Listeners.Init()
 }
 
 func (c *ProgramContext) View() string {
@@ -46,20 +61,20 @@ func (c *ProgramContext) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return c, tea.Quit
 		case "esc":
-			return c.Back()
+			return c.Back(), nil
 		}
 	case tea.WindowSizeMsg:
 		c.onWindowResize(msg)
 	}
-	return nil, nil
+	return nil, c.Listeners.Receive(msg)
 }
 
-func (c *ProgramContext) Back() (tea.Model, tea.Cmd) {
+func (c *ProgramContext) Back() tea.Model {
 	if m, ok := c.History.Pop(); ok {
-		return m, nil
+		return m
 	}
 	// Return nil if there is no history to go back to.
-	return nil, nil
+	return nil
 }
 
 func (c *ProgramContext) Navigate(curr, next tea.Model) (tea.Model, tea.Cmd) {

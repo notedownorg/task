@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package themes
+package taskeditor
 
-import (
-	"github.com/charmbracelet/lipgloss"
-)
+import "github.com/charmbracelet/bubbles/v2/key"
 
-type Theme struct {
-	Panel       lipgloss.Color
-	BorderFaint lipgloss.Color
+type KeyMap struct {
+	ToggleFocus key.Binding
+	Submit      key.Binding
+}
 
-	Text       lipgloss.Color
-	TextCursor lipgloss.Color
-
-	Red    lipgloss.Color
-	Green  lipgloss.Color
-	Yellow lipgloss.Color
-	Blue   lipgloss.Color
+var DefaultKeyMap = KeyMap{
+	ToggleFocus: key.NewBinding(
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "toggle focus between fields"),
+	),
+	Submit: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "submit the task"),
+	),
 }

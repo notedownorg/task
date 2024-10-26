@@ -12,27 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package taskadd
+package taskeditor
 
 import (
+	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
 )
 
+type Focusable interface {
+	Focus() tea.Model
+	Blur() tea.Model
+}
+
 type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
 
+	keyMap KeyMap
+
+	status *Status
+	text   *Text
+
 	footer *statusbar.Model
 }
 
-func NewModel(ctx *context.ProgramContext, t *tasks.Client) *Model {
+func NewAddModel(ctx *context.ProgramContext, t *tasks.Client) *Model {
 	return &Model{
 		ctx:   ctx,
 		tasks: t,
+
+		keyMap: DefaultKeyMap,
+
+		status: NewStatus(ctx, ast.Todo).Focus(),
+		text:   NewText(ctx),
 
 		footer: statusbar.New(ctx, statusbar.NewMode("add task", statusbar.ActionCreate), t),
 	}
@@ -52,8 +69,19 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	// Handle view level key presses
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, m.keyMap.ToggleFocus):
+			m.toggleFocus()
+		case key.Matches(msg, m.keyMap.Submit):
+			return m.submit()
+		}
+	}
 
 	// Handle component events
+	m.status.Update(msg)
+	m.text.Update(msg)
 
 	return m, cmd
 }
@@ -62,12 +90,27 @@ func (m *Model) View() string {
 	horizontalPadding := 2
 	verticalMargin := 1
 
+	status := m.status.View()
+	text := m.text.View()
+
+	form := lipgloss.JoinHorizontal(lipgloss.Left, status, text)
+
 	footer := m.footer.
 		Width(m.ctx.ScreenWidth-horizontalPadding*2).
 		Margin(verticalMargin, 0).
 		View()
 
-	panel := lipgloss.JoinVertical(lipgloss.Top, footer)
+	panel := lipgloss.JoinVertical(lipgloss.Top, form, footer)
 
 	return lipgloss.NewStyle().Padding(0, horizontalPadding).Render(panel)
+}
+
+func (m *Model) toggleFocus() {
+	if m.status.focused {
+		m.status = m.status.Blur()
+		m.text = m.text.Focus()
+	} else {
+		m.status = m.status.Focus()
+		m.text = m.text.Blur()
+	}
 }

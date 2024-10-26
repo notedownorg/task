@@ -17,13 +17,12 @@ package tasklist
 import (
 	"strings"
 
-	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
-	"github.com/notedownorg/task/pkg/themes"
 )
 
 type Model struct {
@@ -79,7 +78,7 @@ func (m *Model) Margin(margin ...int) *Model {
 	return m
 }
 
-func (m Model) listStyle(theme themes.Theme) lipgloss.Style {
+func (m Model) listStyle() lipgloss.Style {
 	return m.base.NewStyle()
 }
 
@@ -93,6 +92,6 @@ func (m *Model) View() string {
 		b.WriteString("\n")
 	}
 
-	return m.listStyle(m.ctx.Theme).
+	return m.listStyle().
 		Render(b.String())
 }
