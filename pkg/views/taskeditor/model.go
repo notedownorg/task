@@ -15,6 +15,8 @@
 package taskeditor
 
 import (
+	"strings"
+
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
@@ -24,19 +26,23 @@ import (
 	"github.com/notedownorg/task/pkg/context"
 )
 
-type Focusable interface {
-	Focus() tea.Model
-	Blur() tea.Model
-}
+type mode int
+
+const (
+	adding mode = iota
+	editing
+)
 
 type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
+	mode  mode
 
 	keyMap KeyMap
 
 	status *Status
 	text   *Text
+	fields *Fields
 
 	footer *statusbar.Model
 }
@@ -45,11 +51,13 @@ func NewAddModel(ctx *context.ProgramContext, t *tasks.Client) *Model {
 	return &Model{
 		ctx:   ctx,
 		tasks: t,
+		mode:  adding,
 
 		keyMap: DefaultKeyMap,
 
 		status: NewStatus(ctx, ast.Todo).Focus(),
 		text:   NewText(ctx),
+		fields: NewFields(ctx),
 
 		footer: statusbar.New(ctx, statusbar.NewMode("add task", statusbar.ActionCreate), t),
 	}
@@ -83,6 +91,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.status.Update(msg)
 	m.text.Update(msg)
 
+	// Attempt to parse the full task and use the response to update the fields subcomponent
+
 	return m, cmd
 }
 
@@ -90,17 +100,47 @@ func (m *Model) View() string {
 	horizontalPadding := 2
 	verticalMargin := 1
 
-	status := m.status.View()
-	text := m.text.View()
-
-	form := lipgloss.JoinHorizontal(lipgloss.Left, status, text)
-
 	footer := m.footer.
 		Width(m.ctx.ScreenWidth-horizontalPadding*2).
 		Margin(verticalMargin, 0).
 		View()
 
-	panel := lipgloss.JoinVertical(lipgloss.Top, form, footer)
+	status := m.status.Margin(0, 2, 0, 0).View()
+	text := m.text.Width(80).View()
+
+	top := lipgloss.NewStyle().
+		Margin(1, 3).
+		Render(lipgloss.JoinHorizontal(lipgloss.Left, status, text))
+
+	fields := lipgloss.NewStyle().
+		Margin(0, 3, 1, 3).
+		Render(m.fields.View())
+
+	lines := lipgloss.JoinVertical(lipgloss.Top,
+		top,
+		fields,
+	)
+
+	border := lipgloss.RoundedBorder()
+	var b strings.Builder
+	str := "Add-Task"
+	for i := len(str) + 2; i <= lipgloss.Width(lines); i++ {
+		b.WriteString(lipgloss.RoundedBorder().Top)
+	}
+	b.WriteString(str)
+	border.Top = b.String()
+
+	form := lipgloss.NewStyle().
+		Border(border).
+		BorderForeground(m.ctx.Theme.Green).
+		Render(lines)
+
+	width := m.ctx.ScreenWidth - horizontalPadding*2
+	height := m.ctx.ScreenHeight - lipgloss.Height(footer)
+
+	dialog := lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, form)
+
+	panel := lipgloss.JoinVertical(lipgloss.Top, dialog, footer)
 
 	return lipgloss.NewStyle().Padding(0, horizontalPadding).Render(panel)
 }
