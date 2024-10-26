@@ -14,7 +14,7 @@
 
 package tasklist
 
-import "github.com/charmbracelet/bubbles/key"
+import "github.com/charmbracelet/bubbles/v2/key"
 
 type KeyMap struct {
 	Up   key.Binding

@@ -28,6 +28,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/notedownorg/task/pkg/context"
+	"github.com/notedownorg/task/pkg/listeners"
 	"github.com/notedownorg/task/pkg/themes"
 	"github.com/notedownorg/task/pkg/views/agenda"
 )
@@ -59,12 +60,17 @@ var rootCmd = &cobra.Command{
 		write := writer.NewClient(cfg.root)
 
 		// Configure the task client
-		sub := make(chan reader.Event)
-		read.Subscribe(sub, reader.WithInitialDocuments())
-		tasksClient := tasks.NewClient(write, sub, tasks.WithInitialLoadWaiter(100*time.Millisecond))
+		readSub := make(chan reader.Event)
+		read.Subscribe(readSub, reader.WithInitialDocuments())
+		tasksClient := tasks.NewClient(write, readSub, tasks.WithInitialLoadWaiter(100*time.Millisecond))
+
+		// Create a listener for the task client to refresh the TUI when tasks are created/updated/deleted
+		taskSub := make(chan tasks.Event)
+		tasksClient.Subscribe(taskSub)
+		taskListener := listeners.NewTaskListener(taskSub)
 
 		// Create the initial model and run the program
-		ctx := &context.ProgramContext{Theme: themes.CatpuccinMocha}
+		ctx := context.New(themes.CatpuccinMocha, context.WithListeners(taskListener))
 		agenda := agenda.New(ctx, tasksClient)
 
 		p := tea.NewProgram(agenda, tea.WithAltScreen())

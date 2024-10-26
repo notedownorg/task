@@ -14,7 +14,7 @@
 
 package agenda
 
-import "github.com/charmbracelet/bubbles/key"
+import "github.com/charmbracelet/bubbles/v2/key"
 
 type KeyMap struct {
 	AddTask key.Binding

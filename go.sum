@@ -1,9 +1,11 @@
 github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a h1:vlmAfVwFK9sRpDlJyuHY8htP+KfGHB2VH02u0SoIufk=
 github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a/go.mod h1:3mnrkvGpurZ4ZrTDbYU84xhwXW2TjTKShSwjRi2ihfQ=
+github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
+github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1/go.mod h1:uYgXzlJ7ZpABp8OJ+exZzJJhRNQ2ASbcXHWsFqH8hp8=
-github.com/charmbracelet/bubbles v0.20.0 h1:jSZu6qD8cRQ6k9OMfR1WlM+ruM8fkPWkHvQWD9LIutE=
-github.com/charmbracelet/bubbles v0.20.0/go.mod h1:39slydyswPy+uVOHZ5x/GjwVAFkCsV8IIVy+4MhzwwU=
+github.com/charmbracelet/bubbles/v2 v2.0.0-alpha.1 h1:4Am/U9zvRBZ5iSIDeNioGrc9N9+4U2AjiRJBttAwUVc=
+github.com/charmbracelet/bubbles/v2 v2.0.0-alpha.1/go.mod h1:rq09SZbh77FFBMvKi5k2vGXJ7K4u0GjLqmUby3K3los=
 github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1 h1:OZtpLCsuuPplC+1oyUo+/eAN7e9MC2UyZWKlKrVlUnw=
 github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1/go.mod h1:j0gn4ft5CE7NDYNZjAA3hBM8t2OPjI8urxuAD0oR4w8=
 github.com/charmbracelet/lipgloss v0.13.1 h1:Oik/oqDTMVA01GetT4JdEC033dNzWoQHdWnHnQmXE2A=
@@ -51,8 +53,8 @@ github.com/muesli/cancelreader v0.2.2 h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELU
 github.com/muesli/cancelreader v0.2.2/go.mod h1:3XuTXfFS2VjM+HTLZY9Ak0l6eUKfijIfMUZ4EgX0QYo=
 github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo=
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
-github.com/notedownorg/notedown v0.0.0-20241025153823-1a190f8137bf h1:ZC+SJ2vnOzItVUd5zR8c+7CV6pFsPsPA03bTjPwxFrQ=
-github.com/notedownorg/notedown v0.0.0-20241025153823-1a190f8137bf/go.mod h1:gtN8pq5eQ9K9FYYxX5Uk0BrRLFW1u85peUNbmp5RNuo=
+github.com/notedownorg/notedown v0.0.0-20241026135931-c5ce0586a556 h1:mQ60PyRyCQOGradjI/3Gar8yy2pAPdkMFni7t/VKJ1s=
+github.com/notedownorg/notedown v0.0.0-20241026135931-c5ce0586a556/go.mod h1:gtN8pq5eQ9K9FYYxX5Uk0BrRLFW1u85peUNbmp5RNuo=
 github.com/otiai10/copy v1.14.0 h1:dCI/t1iTdYGtkvCuBG2BgR6KZa83PTclw4U5n2wAllU=
 github.com/otiai10/copy v1.14.0/go.mod h1:ECfuL02W+/FkTWZWgQqXPWZgW9oeKCSQ5qVfSc4qc4w=
 github.com/pelletier/go-toml/v2 v2.2.2 h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6Wq+LM=

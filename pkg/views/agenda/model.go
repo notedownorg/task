@@ -17,14 +17,14 @@ package agenda
 import (
 	"time"
 
-	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/components/tasklist"
 	"github.com/notedownorg/task/pkg/context"
-	"github.com/notedownorg/task/pkg/views/taskadd"
+	"github.com/notedownorg/task/pkg/views/taskeditor"
 )
 
 const (
@@ -55,7 +55,8 @@ type Model struct {
 }
 
 func (m *Model) Init() (tea.Model, tea.Cmd) {
-	return m, nil
+	_, cmd := m.ctx.Init()
+	return m, cmd
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -70,7 +71,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.AddTask):
-			return m.ctx.Navigate(m, taskadd.NewModel(m.ctx, m.tasks))
+			return m.ctx.Navigate(m, taskeditor.NewAddModel(m.ctx, m.tasks))
 		}
 	}
 
