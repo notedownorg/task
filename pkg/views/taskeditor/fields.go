@@ -15,63 +15,53 @@
 package taskeditor
 
 import (
-	"github.com/charmbracelet/bubbles/v2/textinput"
+	"time"
+
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
 )
 
-type Text struct {
+type Fields struct {
 	base model.Base
 
 	ctx *context.ProgramContext
 
-	ti textinput.Model
+	due       *time.Time
+	scheduled *time.Time
+	completed *time.Time
+	priority  *int
+	every     *ast.Every
 }
 
-func NewText(ctx *context.ProgramContext) *Text {
-	ti := textinput.New()
-	ti.Prompt = ""
-	ti.Placeholder = "Set status then start typing to populate task and fields"
-	return &Text{
+func NewFields(ctx *context.ProgramContext) *Fields {
+	return &Fields{
 		ctx: ctx,
-		ti:  ti,
 	}
 }
 
-func (t *Text) Init() (tea.Model, tea.Cmd) {
-	return t, nil
+func (f *Fields) Init() (tea.Model, tea.Cmd) {
+	return f, nil
 }
 
-func (t *Text) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	t.ti, cmd = t.ti.Update(msg)
-	return t, cmd
+func (f *Fields) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return f, nil
 }
 
-func (t *Text) Focus() *Text {
-	t.ti.Focus()
-	return t
+func (f Fields) unset() bool {
+	return f.due == nil && f.scheduled == nil && f.completed == nil && f.priority == nil && f.every == nil
 }
 
-func (t *Text) Blur() *Text {
-	t.ti.Blur()
-	return t
-}
+func (s *Fields) View() string {
+	if s.unset() {
+		return lipgloss.NewStyle().
+			Padding(0, 1).
+			Background(s.ctx.Theme.Panel).
+			Render("no fields set")
+	}
 
-func (t Text) AtBeginning() bool {
-	return t.ti.Position() == 0
-}
-
-func (t *Text) Width(i int) *Text {
-	t.ti.Width = i
-	return t
-}
-
-func (t Text) Value() string {
-	return t.ti.Value()
-}
-
-func (s *Text) View() string {
-	return s.ti.View()
+	return s.base.NewStyle().
+		Render("todo")
 }

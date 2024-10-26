@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
@@ -81,8 +80,13 @@ func (s Status) Value() ast.Status {
 	return s.value
 }
 
+func (s *Status) Margin(i ...int) *Status {
+	s.base.Margin(i...)
+	return s
+}
+
 func (s *Status) View() string {
-	return lipgloss.NewStyle().
+	return s.base.NewStyle().
 		Foreground(s.ctx.Theme.Text).
 		Blink(s.focused).
 		Render(fmt.Sprintf("[%s]", string(s.value)))
