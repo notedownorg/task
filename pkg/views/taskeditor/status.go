@@ -80,6 +80,10 @@ func (s Status) Value() ast.Status {
 	return s.value
 }
 
+func (s *Status) SetValue(value ast.Status) {
+	s.value = value
+}
+
 func (s *Status) Margin(i ...int) *Status {
 	s.base.Margin(i...)
 	return s

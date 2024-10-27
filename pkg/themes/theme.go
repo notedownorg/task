@@ -18,6 +18,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// TODO: The colors should probably have more generic/correct(?) names
 type Theme struct {
 	Panel       lipgloss.Color
 	BorderFaint lipgloss.Color
@@ -25,8 +26,17 @@ type Theme struct {
 	Text       lipgloss.Color
 	TextCursor lipgloss.Color
 
-	Red    lipgloss.Color
-	Green  lipgloss.Color
-	Yellow lipgloss.Color
-	Blue   lipgloss.Color
+	// Basic Terminal Colors
+	Red     lipgloss.Color
+	Green   lipgloss.Color
+	Yellow  lipgloss.Color
+	Blue    lipgloss.Color
+	Magenta lipgloss.Color
+	Cyan    lipgloss.Color
+
+	// Additional Colors
+	Orange   lipgloss.Color
+	Pink     lipgloss.Color
+	RedSoft  lipgloss.Color
+	BlueSoft lipgloss.Color
 }

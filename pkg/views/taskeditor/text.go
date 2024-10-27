@@ -17,6 +17,7 @@ package taskeditor
 import (
 	"github.com/charmbracelet/bubbles/v2/textinput"
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
 )
@@ -26,7 +27,8 @@ type Text struct {
 
 	ctx *context.ProgramContext
 
-	ti textinput.Model
+	ti      textinput.Model
+	IsValid bool
 }
 
 func NewText(ctx *context.ProgramContext) *Text {
@@ -72,6 +74,23 @@ func (t Text) Value() string {
 	return t.ti.Value()
 }
 
+func (t *Text) SetValue(s string) {
+	t.ti.SetValue(s)
+}
+
+func (t Text) Cursor() int {
+	return t.ti.Position()
+}
+
+func (t *Text) SetCursor(i int) {
+	t.ti.SetCursor(i)
+}
+
 func (s *Text) View() string {
-	return s.ti.View()
+	valid := lipgloss.NewStyle().Foreground(s.ctx.Theme.Green).Render("✓")
+	invalid := lipgloss.NewStyle().Foreground(s.ctx.Theme.Red).Render("✗")
+	if s.IsValid {
+		return s.ti.View() + " " + valid
+	}
+	return s.ti.View() + " " + invalid
 }

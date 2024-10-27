@@ -92,6 +92,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.text.Update(msg)
 
 	// Attempt to parse the full task and use the response to update the fields subcomponent
+	m.parseTask()
 
 	return m, cmd
 }
