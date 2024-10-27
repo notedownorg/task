@@ -84,7 +84,7 @@ func (m Model) listStyle() lipgloss.Style {
 
 func (m *Model) View() string {
 	var b strings.Builder
-	for i, task := range m.tasks.ListTasks(tasks.FetchAllTasks()) {
+	for i, task := range m.tasks.ListTasks(tasks.FetchAllTasks(), tasks.WithSorters(tasks.SortByStatus(tasks.DefautStatusOrder()))) {
 		b.WriteString(m.renderTask(task, i == m.selected))
 		if i > 25 {
 			break
