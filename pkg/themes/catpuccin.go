@@ -26,10 +26,17 @@ var (
 		Text:       CatpuccinMochaPalette.Text,
 		TextCursor: CatpuccinMochaPalette.Crust,
 
-		Red:    CatpuccinMochaPalette.Red,
-		Green:  CatpuccinMochaPalette.Green,
-		Yellow: CatpuccinMochaPalette.Yellow,
-		Blue:   CatpuccinMochaPalette.Blue,
+		Red:     CatpuccinMochaPalette.Red,
+		Green:   CatpuccinMochaPalette.Green,
+		Yellow:  CatpuccinMochaPalette.Yellow,
+		Blue:    CatpuccinMochaPalette.Blue,
+		Magenta: CatpuccinMochaPalette.Mauve,
+		Cyan:    CatpuccinMochaPalette.Teal,
+
+		Orange:   CatpuccinMochaPalette.Peach,
+		Pink:     CatpuccinMochaPalette.Pink,
+		RedSoft:  CatpuccinMochaPalette.Maroon,
+		BlueSoft: CatpuccinMochaPalette.Sapphire,
 	}
 
 	// https://catppuccin.com/palette

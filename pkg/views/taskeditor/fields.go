@@ -15,6 +15,8 @@
 package taskeditor
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
@@ -29,11 +31,11 @@ type Fields struct {
 
 	ctx *context.ProgramContext
 
-	due       *time.Time
-	scheduled *time.Time
-	completed *time.Time
-	priority  *int
-	every     *ast.Every
+	Due       *time.Time
+	Scheduled *time.Time
+	Completed *time.Time
+	Priority  *int
+	Every     *ast.Every
 }
 
 func NewFields(ctx *context.ProgramContext) *Fields {
@@ -51,17 +53,41 @@ func (f *Fields) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (f Fields) unset() bool {
-	return f.due == nil && f.scheduled == nil && f.completed == nil && f.priority == nil && f.every == nil
+	return f.Due == nil && f.Scheduled == nil && f.Completed == nil && f.Priority == nil && f.Every == nil
 }
 
-func (s *Fields) View() string {
-	if s.unset() {
+func (f Fields) pillStyle(color lipgloss.Color) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Background(color).
+		Foreground(f.ctx.Theme.TextCursor).
+		Padding(0, 1)
+}
+
+func (f *Fields) View() string {
+	if f.unset() {
 		return lipgloss.NewStyle().
 			Padding(0, 1).
-			Background(s.ctx.Theme.Panel).
+			Background(f.ctx.Theme.Panel).
 			Render("no fields set")
 	}
 
-	return s.base.NewStyle().
-		Render("todo")
+	var fields []string
+	if f.Due != nil {
+		fields = append(fields, f.pillStyle(f.ctx.Theme.Green).Render("󰃭 "+f.Due.Format("2006-01-02")))
+	}
+	if f.Priority != nil {
+		fields = append(fields, f.pillStyle(f.ctx.Theme.Yellow).Render("  "+fmt.Sprintf("%d", *f.Priority)))
+	}
+	if f.Scheduled != nil {
+		fields = append(fields, f.pillStyle(f.ctx.Theme.RedSoft).Render("󰀠 "+f.Scheduled.Format("2006-01-02")))
+	}
+	if f.Every != nil {
+		fields = append(fields, f.pillStyle(f.ctx.Theme.Magenta).Render("  "+f.Every.Text))
+	}
+	if f.Completed != nil {
+		fields = append(fields, f.pillStyle(f.ctx.Theme.BlueSoft).Render(" "+f.Completed.Format("2006-01-02")))
+	}
+
+	return f.base.NewStyle().
+		Render(strings.Join(fields, "  "))
 }

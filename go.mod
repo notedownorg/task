@@ -3,6 +3,7 @@ module github.com/notedownorg/task
 go 1.22.7
 
 require (
+	github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a
 	github.com/charmbracelet/bubbles/v2 v2.0.0-alpha.1
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1
 	github.com/charmbracelet/lipgloss v0.13.1
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/x/ansi v0.3.2 // indirect
