@@ -37,48 +37,50 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "task",
 	Short: "A task management CLI & TUI for your Notedown notes",
-	Run: func(cmd *cobra.Command, args []string) {
-		cfg := loadConfig()
+	Run:   root,
+}
 
-		// Configure logging to a file
-		// logFileLocation := path.Join(cfg.root, "debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
-		logFileLocation := "task.log"
-		logFile, err := os.OpenFile(logFileLocation, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			fmt.Println("Error opening log file:", err)
-			os.Exit(1)
-		}
-		defer logFile.Close()
-		slog.SetDefault(slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug})))
+func root(cmd *cobra.Command, args []string) {
+	cfg := loadConfig()
 
-		// Configure workspace reader/writer
-		read, err := reader.NewClient(cfg.root, "task")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		write := writer.NewClient(cfg.root)
+	// Configure logging to a file
+	// logFileLocation := path.Join(cfg.root, "debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
+	logFileLocation := "task.log"
+	logFile, err := os.OpenFile(logFileLocation, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Error opening log file:", err)
+		os.Exit(1)
+	}
+	defer logFile.Close()
+	slog.SetDefault(slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
-		// Configure the task client
-		readSub := make(chan reader.Event)
-		read.Subscribe(readSub, reader.WithInitialDocuments())
-		tasksClient := tasks.NewClient(write, readSub, tasks.WithInitialLoadWaiter(100*time.Millisecond))
+	// Configure workspace reader/writer
+	read, err := reader.NewClient(cfg.root, "task")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	write := writer.NewClient(cfg.root)
 
-		// Create a listener for the task client to refresh the TUI when tasks are created/updated/deleted
-		taskSub := make(chan tasks.Event)
-		tasksClient.Subscribe(taskSub)
-		taskListener := listeners.NewTaskListener(taskSub)
+	// Configure the task client
+	readSub := make(chan reader.Event)
+	read.Subscribe(readSub, reader.WithInitialDocuments())
+	tasksClient := tasks.NewClient(write, readSub, tasks.WithInitialLoadWaiter(100*time.Millisecond))
 
-		// Create the initial model and run the program
-		ctx := context.New(themes.CatpuccinMocha, context.WithListeners(taskListener))
-		agenda := agenda.New(ctx, tasksClient)
+	// Create a listener for the task client to refresh the TUI when tasks are created/updated/deleted
+	taskSub := make(chan tasks.Event)
+	tasksClient.Subscribe(taskSub)
+	taskListener := listeners.NewTaskListener(taskSub)
 
-		p := tea.NewProgram(agenda, tea.WithAltScreen())
-		if _, err := p.Run(); err != nil {
-			fmt.Println("Error running program:", err)
-			os.Exit(1)
-		}
-	},
+	// Create the initial model and run the program
+	ctx := context.New(themes.CatpuccinMocha, context.WithListeners(taskListener))
+	agenda := agenda.New(ctx, tasksClient)
+
+	p := tea.NewProgram(agenda, tea.WithAltScreen())
+	if _, err := p.Run(); err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

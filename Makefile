@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+.PHONY: all dirty mod format test sandbox licenser
+
 all: format mod test dirty
 
 dirty:
@@ -26,8 +28,8 @@ format: licenser
 test:
 	go test -v ./...
 
-dev:
-	NOTEDOWN_DIR=$(shell pwd)/workspace go run main.go
+sandbox:
+	go run main.go sandbox
 
 licenser:
 	licenser apply -r "Notedown Authors"
