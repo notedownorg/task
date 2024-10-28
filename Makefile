@@ -28,8 +28,8 @@ format: licenser
 test:
 	go test -v ./...
 
-sandbox:
-	go run main.go sandbox
+dev:
+	NOTEDOWN_DIR=$(shell go generate ./gen/sandbox) go run main.go
 
 licenser:
 	licenser apply -r "Notedown Authors"
