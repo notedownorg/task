@@ -16,10 +16,12 @@ package tasklist
 
 import (
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
@@ -83,12 +85,36 @@ func (m Model) listStyle() lipgloss.Style {
 }
 
 func (m *Model) View() string {
+	today := time.Now().Truncate(24 * time.Hour)
+	yesterday := today.Add(time.Second * -1) // 1 second before today
+	tomorrow := today.AddDate(0, 0, 1)
+
+	overdue := m.tasks.ListTasks(
+		tasks.FetchAllTasks(),
+		tasks.WithFilters(
+			tasks.FilterByStatus(ast.Todo, ast.Doing, ast.Blocked),
+			tasks.FilterByDueDate(nil, &tomorrow),
+		),
+		tasks.WithSorters(
+			tasks.SortByStatus(tasks.AgendaOrder()),
+			tasks.SortByPriority(),
+		),
+	)
+
+	completed := m.tasks.ListTasks(
+		tasks.FetchAllTasks(),
+		tasks.WithFilters(
+			tasks.FilterByStatus(ast.Done),
+			tasks.FilterByCompletedDate(&yesterday, &tomorrow),
+		),
+		tasks.WithSorters(tasks.SortByAlphabetical()),
+	)
+
+	all := append(overdue, completed...)
+
 	var b strings.Builder
-	for i, task := range m.tasks.ListTasks(tasks.FetchAllTasks(), tasks.WithSorters(tasks.SortByStatus(tasks.DefautStatusOrder()))) {
+	for i, task := range all {
 		b.WriteString(m.renderTask(task, i == m.selected))
-		if i > 25 {
-			break
-		}
 		b.WriteString("\n")
 	}
 
