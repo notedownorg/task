@@ -22,46 +22,54 @@ import (
 	"github.com/notedownorg/task/pkg/themes"
 )
 
-func taskStyle(theme themes.Theme) lipgloss.Style {
-	return lipgloss.NewStyle().
-		Foreground(theme.Text)
-}
-
-func selectedTaskStyle(theme themes.Theme) lipgloss.Style {
-	return lipgloss.NewStyle().Inherit(taskStyle(theme)).
-		Foreground(theme.TextCursor).
-		Background(theme.Text).
-		Bold(true)
-}
-
-func (m Model) renderTask(task ast.Task, selected bool) string {
-	icon := m.renderIcon(task.Status())
-	space := " "
+func renderTask(theme themes.Theme, task ast.Task, selected bool) string {
+	i := icon(task.Status())
 	name := task.Name()
 
-	t := lipgloss.JoinHorizontal(lipgloss.Left, icon, space, space, name)
-
-	if selected {
-		return selectedTaskStyle(m.ctx.Theme).Render(t)
+	// Handle styling based on task status
+	s := lipgloss.NewStyle()
+	switch task.Status() {
+	case ast.Doing:
+		if selected {
+			return s.Padding(0, 1).Background(theme.Green).Foreground(theme.TextCursor).Render(i + "  " + name)
+		}
+		return s.Padding(0, 1).Foreground(theme.Green).Render(i + "  " + name)
+	case ast.Todo:
+		if selected {
+			return s.Padding(0, 1).Background(theme.Text).Foreground(theme.TextCursor).Render(i + "  " + name)
+		}
+		return s.Padding(0, 1).Foreground(theme.Text).Render(i + "  " + name)
+	case ast.Blocked:
+		if selected {
+			return s.Padding(0, 1).Background(theme.Red).Foreground(theme.TextCursor).Render(i + "  " + name)
+		}
+		return s.Padding(0, 1).Foreground(theme.Red).Render(i + "  " + name)
+	case ast.Done, ast.Abandoned:
+		if selected {
+			base := s.Background(theme.TextFaint).Foreground(theme.TextCursor)
+			return base.Padding(0, 1).Render(base.Render(i+"  ") + base.Strikethrough(true).Render(name))
+		}
+		base := s.Foreground(theme.TextFaint)
+		return s.Padding(0, 1).Render(base.Render(i+"  ") + base.Strikethrough(true).Render(name))
 	}
-	return taskStyle(m.ctx.Theme).Render(t)
+	slog.Warn("unknown task status", "status", task.Status())
+	return ""
 }
 
-func (m Model) renderIcon(status ast.Status) string {
-	render := lipgloss.NewStyle().Padding(0, 1).Render
+func icon(status ast.Status) string {
 	switch status {
 	case ast.Todo:
-		return render("")
+		return ""
 	case ast.Blocked:
-		return render("")
+		return ""
 	case ast.Doing:
-		return render("") //  or  ?
+		return ""
 	case ast.Done:
-		return render("")
+		return ""
 	case ast.Abandoned:
-		return render("")
+		return ""
 	default:
 		slog.Warn("unknown task status", "status", status)
-		return render(" ")
+		return " "
 	}
 }

@@ -28,12 +28,11 @@ import (
 )
 
 type Model struct {
-	base model.Base
-
-	ctx   *context.ProgramContext
-	tasks *tasks.Client
-
+	base   model.Base
+	ctx    *context.ProgramContext
 	keyMap KeyMap
+
+	tasks *tasks.Client
 
 	// this may need to be an array of linked list ints(?) in the future to
 	// suppport selecting multiple tasks and subtasks
@@ -57,9 +56,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.Up):
+			if m.selected == 0 {
+				return m, nil
+			}
 			m.selected--
 		case key.Matches(msg, m.keyMap.Down):
-			m.selected++
+			m.selected++ // we don't know if this is oob until render time
 		}
 	}
 	return m, nil
@@ -84,10 +86,10 @@ func (m Model) listStyle() lipgloss.Style {
 	return m.base.NewStyle()
 }
 
-func (m *Model) View() string {
+func (m *Model) visibleTasks() []ast.Task {
 	today := time.Now().Truncate(24 * time.Hour)
-	yesterday := today.Add(time.Second * -1) // 1 second before today
-	tomorrow := today.AddDate(0, 0, 1)
+	yesterday := today.Add(-1)
+	tomorrow := today.AddDate(0, 0, 1).Add(-1)
 
 	overdue := m.tasks.ListTasks(
 		tasks.FetchAllTasks(),
@@ -109,12 +111,27 @@ func (m *Model) View() string {
 		),
 		tasks.WithSorters(tasks.SortByAlphabetical()),
 	)
+	return append(overdue, completed...)
+}
 
-	all := append(overdue, completed...)
+func (m *Model) View() string {
+	t := m.visibleTasks()
+	if len(t) == 0 {
+		return m.listStyle().Render("No tasks")
+	}
 
 	var b strings.Builder
-	for i, task := range all {
-		b.WriteString(m.renderTask(task, i == m.selected))
+	for m.selected >= len(t) {
+		m.selected--
+	}
+
+	currentGroup := t[0].Status()
+	for i, task := range t {
+		if task.Status() != currentGroup {
+			currentGroup = task.Status()
+			b.WriteString("\n")
+		}
+		b.WriteString(renderTask(m.ctx.Theme, task, i == m.selected))
 		b.WriteString("\n")
 	}
 

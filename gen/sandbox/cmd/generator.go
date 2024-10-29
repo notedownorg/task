@@ -75,6 +75,11 @@ func genTask(client *tasks.Client, file string, index int) {
 		opts = append(opts, ast.WithDue(time.Now().AddDate(0, 0, chance)))
 	}
 
+	// If completed we need to set the completed date to a random date in the last 3 days
+	if status == ast.Done {
+		opts = append(opts, ast.WithCompleted(time.Now().AddDate(0, 0, -rand.Intn(3))))
+	}
+
 	if err := client.Create(file, fmt.Sprintf("Task %d", index), status, opts...); err != nil {
 		slog.Error("failed to create task", "file", file, "error", err)
 	}

@@ -25,6 +25,7 @@ var (
 
 		Text:       CatpuccinMochaPalette.Text,
 		TextCursor: CatpuccinMochaPalette.Crust,
+		TextFaint:  CatpuccinMochaPalette.Subtext0,
 
 		Red:     CatpuccinMochaPalette.Red,
 		Green:   CatpuccinMochaPalette.Green,
