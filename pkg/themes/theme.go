@@ -25,6 +25,7 @@ type Theme struct {
 
 	Text       lipgloss.Color
 	TextCursor lipgloss.Color
+	TextFaint  lipgloss.Color
 
 	// Basic Terminal Colors
 	Red     lipgloss.Color

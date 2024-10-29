@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1
 	github.com/charmbracelet/lipgloss v0.13.1
 	github.com/google/uuid v1.6.0
-	github.com/notedownorg/notedown v0.0.0-20241028161324-3d97cc78308f
+	github.com/notedownorg/notedown v0.0.0-20241028212414-5f0259f17f35
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )
