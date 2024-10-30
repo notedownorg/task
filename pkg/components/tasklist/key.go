@@ -17,10 +17,11 @@ package tasklist
 import "github.com/charmbracelet/bubbles/v2/key"
 
 type KeyMap struct {
-	Up      key.Binding
-	Down    key.Binding
-	NextDay key.Binding
-	PrevDay key.Binding
+	Up        key.Binding
+	Down      key.Binding
+	NextDay   key.Binding
+	PrevDay   key.Binding
+	ResetDate key.Binding
 }
 
 var DefaultKeyMap = KeyMap{
@@ -39,5 +40,9 @@ var DefaultKeyMap = KeyMap{
 	PrevDay: key.NewBinding(
 		key.WithKeys("h", "left"),
 		key.WithHelp("←/h", "previous day"),
+	),
+	ResetDate: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "reset date to today"),
 	),
 }

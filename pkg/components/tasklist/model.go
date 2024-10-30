@@ -69,6 +69,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Date = m.Date.AddDate(0, 0, 1)
 		case key.Matches(msg, m.keyMap.PrevDay):
 			m.Date = m.Date.AddDate(0, 0, -1)
+		case key.Matches(msg, m.keyMap.ResetDate):
+			m.Date = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC)
 		}
 	}
 	return m, nil
