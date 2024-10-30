@@ -15,7 +15,7 @@
 package agenda
 
 import (
-	"time"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
@@ -35,7 +35,6 @@ func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
 	return &Model{
 		ctx:   ctx,
 		tasks: t,
-		date:  time.Now(),
 
 		keyMap:   DefaultKeyMap,
 		tasklist: tasklist.New(ctx, t),
@@ -46,7 +45,6 @@ func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
 type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
-	date  time.Time
 
 	keyMap KeyMap
 
@@ -83,22 +81,23 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
+	gap := ""
 	horizontalPadding := 2
-	verticalMargin := 1
+	verticalPadding := 1
 	h := lipgloss.Height
 
+	header := fmt.Sprintf("← %v →", m.tasklist.Date.Format("Monday, January 2, 2006"))
+
 	footer := m.footer.
-		Width(m.ctx.ScreenWidth-horizontalPadding*2).
-		Margin(verticalMargin, 0).
+		Width(m.ctx.ScreenWidth - horizontalPadding*2).
 		View()
 
 	tasklist := m.tasklist.
-		Height(m.ctx.ScreenHeight-h(footer)-verticalMargin*2).
-		Width(m.ctx.ScreenWidth).
-		Margin(verticalMargin, 0).
+		Height(m.ctx.ScreenHeight - h(footer) - h(header) - verticalPadding*2 - 2). // -2 for the gaps
+		Width(m.ctx.ScreenWidth - horizontalPadding*2).
 		View()
 
-	panel := lipgloss.JoinVertical(lipgloss.Top, tasklist, footer)
+	panel := lipgloss.JoinVertical(lipgloss.Top, header, gap, tasklist, gap, footer)
 
-	return lipgloss.NewStyle().Padding(0, horizontalPadding).Render(panel)
+	return lipgloss.NewStyle().Padding(verticalPadding, horizontalPadding).Render(panel)
 }
