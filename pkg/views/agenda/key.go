@@ -18,11 +18,38 @@ import "github.com/charmbracelet/bubbles/v2/key"
 
 type KeyMap struct {
 	AddTask key.Binding
+
+	NextDay   key.Binding
+	PrevDay   key.Binding
+	ResetDate key.Binding
+
+	CursorUp   key.Binding
+	CursorDown key.Binding
 }
 
 var DefaultKeyMap = KeyMap{
 	AddTask: key.NewBinding(
 		key.WithKeys("a"),
-		key.WithHelp("a", "Add a new task"),
+		key.WithHelp("a", "add a new task"),
+	),
+	NextDay: key.NewBinding(
+		key.WithKeys("l", "right"),
+		key.WithHelp("→/l", "next day"),
+	),
+	PrevDay: key.NewBinding(
+		key.WithKeys("h", "left"),
+		key.WithHelp("←/h", "previous day"),
+	),
+	ResetDate: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "reset date to today"),
+	),
+	CursorUp: key.NewBinding(
+		key.WithKeys("k", "up"),
+		key.WithHelp("↑/k", "move cursor up"),
+	),
+	CursorDown: key.NewBinding(
+		key.WithKeys("j", "down"),
+		key.WithHelp("↓/j", "move cursor down"),
 	),
 }

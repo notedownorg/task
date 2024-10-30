@@ -21,9 +21,10 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/components/statusbar"
-	"github.com/notedownorg/task/pkg/components/tasklist"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/views/taskeditor"
 )
@@ -33,14 +34,18 @@ const (
 )
 
 func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
-	return &Model{
+	m := &Model{
 		ctx:   ctx,
 		tasks: t,
 
-		keyMap:   DefaultKeyMap,
-		tasklist: tasklist.New(ctx, t),
+		keyMap: DefaultKeyMap,
+		date:   time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC),
+
+		tasklist: groupedlist.New[ast.Task](groupedlist.WithRenderers(rendererFuncs(ctx.Theme))),
 		footer:   statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
 	}
+	m.tasklist.SetGroups(m.visibleTasks())
+	return m
 }
 
 type Model struct {
@@ -48,8 +53,9 @@ type Model struct {
 	tasks *tasks.Client
 
 	keyMap KeyMap
+	date   time.Time
 
-	tasklist *tasklist.Model
+	tasklist *groupedlist.Model[ast.Task]
 	footer   *statusbar.Model
 }
 
@@ -65,20 +71,30 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return model, cmd // If model is not nil, we're navigating back to the previous view
 	}
 
-	// Handle view level key presses
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.AddTask):
 			return m.ctx.Navigate(m, taskeditor.NewAddModel(m.ctx, m.tasks))
+		case key.Matches(msg, m.keyMap.NextDay):
+			m.updateDate(m.date.AddDate(0, 0, 1))
+		case key.Matches(msg, m.keyMap.PrevDay):
+			m.updateDate(m.date.AddDate(0, 0, -1))
+		case key.Matches(msg, m.keyMap.ResetDate):
+			m.date = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC)
+		case key.Matches(msg, m.keyMap.CursorUp):
+			m.tasklist.MoveUp(1)
+		case key.Matches(msg, m.keyMap.CursorDown):
+			m.tasklist.MoveDown(1)
 		}
 	}
 
-	// Handle component events
-	tl, _ := m.tasklist.Update(msg)
-	m.tasklist = tl.(*tasklist.Model)
-
 	return m, cmd
+}
+
+func (m *Model) updateDate(date time.Time) {
+	m.date = date
+	m.tasklist.SetGroups(m.visibleTasks())
 }
 
 func (m *Model) View() string {
@@ -87,7 +103,7 @@ func (m *Model) View() string {
 	verticalPadding := 1
 	h := lipgloss.Height
 
-	header := fmt.Sprintf("← %v →", humanizeDate(m.tasklist.Date, time.Now()))
+	header := fmt.Sprintf("← %v →", humanizeDate(m.date, time.Now()))
 
 	footer := m.footer.
 		Width(m.ctx.ScreenWidth - horizontalPadding*2).
