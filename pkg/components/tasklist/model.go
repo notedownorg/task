@@ -37,13 +37,15 @@ type Model struct {
 	// this may need to be an array of linked list ints(?) in the future to
 	// suppport selecting multiple tasks and subtasks
 	selected int
+	viewDate time.Time
 }
 
 func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
 	return &Model{
-		ctx:    ctx,
-		tasks:  t,
-		keyMap: DefaultKeyMap,
+		ctx:      ctx,
+		tasks:    t,
+		keyMap:   DefaultKeyMap,
+		viewDate: time.Now().Truncate(24 * time.Hour),
 	}
 }
 
@@ -62,6 +64,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.selected--
 		case key.Matches(msg, m.keyMap.Down):
 			m.selected++ // we don't know if this is oob until render time
+		case key.Matches(msg, m.keyMap.NextDay):
+			m.viewDate = m.viewDate.AddDate(0, 0, 1)
+		case key.Matches(msg, m.keyMap.PrevDay):
+			m.viewDate = m.viewDate.AddDate(0, 0, -1)
 		}
 	}
 	return m, nil
@@ -87,15 +93,14 @@ func (m Model) listStyle() lipgloss.Style {
 }
 
 func (m *Model) visibleTasks() []ast.Task {
-	today := time.Now().Truncate(24 * time.Hour)
-	yesterday := today.Add(-1)
-	tomorrow := today.AddDate(0, 0, 1).Add(-1)
+	prev := m.viewDate.Add(-1)
+	next := m.viewDate.AddDate(0, 0, 1).Add(-1)
 
 	overdue := m.tasks.ListTasks(
 		tasks.FetchAllTasks(),
 		tasks.WithFilters(
 			tasks.FilterByStatus(ast.Todo, ast.Doing, ast.Blocked),
-			tasks.FilterByDueDate(nil, &tomorrow),
+			tasks.FilterByDueDate(nil, &next),
 		),
 		tasks.WithSorters(
 			tasks.SortByStatus(tasks.AgendaOrder()),
@@ -107,7 +112,7 @@ func (m *Model) visibleTasks() []ast.Task {
 		tasks.FetchAllTasks(),
 		tasks.WithFilters(
 			tasks.FilterByStatus(ast.Done),
-			tasks.FilterByCompletedDate(&yesterday, &tomorrow),
+			tasks.FilterByCompletedDate(&prev, &next),
 		),
 		tasks.WithSorters(tasks.SortByAlphabetical()),
 	)
