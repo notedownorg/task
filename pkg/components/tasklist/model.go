@@ -37,15 +37,16 @@ type Model struct {
 	// this may need to be an array of linked list ints(?) in the future to
 	// suppport selecting multiple tasks and subtasks
 	selected int
-	viewDate time.Time
+	Date     time.Time
 }
 
 func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
+	now := time.Now()
 	return &Model{
-		ctx:      ctx,
-		tasks:    t,
-		keyMap:   DefaultKeyMap,
-		viewDate: time.Now().Truncate(24 * time.Hour),
+		ctx:    ctx,
+		tasks:  t,
+		keyMap: DefaultKeyMap,
+		Date:   time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC),
 	}
 }
 
@@ -65,9 +66,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.Down):
 			m.selected++ // we don't know if this is oob until render time
 		case key.Matches(msg, m.keyMap.NextDay):
-			m.viewDate = m.viewDate.AddDate(0, 0, 1)
+			m.Date = m.Date.AddDate(0, 0, 1)
 		case key.Matches(msg, m.keyMap.PrevDay):
-			m.viewDate = m.viewDate.AddDate(0, 0, -1)
+			m.Date = m.Date.AddDate(0, 0, -1)
 		}
 	}
 	return m, nil
@@ -89,12 +90,14 @@ func (m *Model) Margin(margin ...int) *Model {
 }
 
 func (m Model) listStyle() lipgloss.Style {
-	return m.base.NewStyle()
+	return m.base.NewStyle().
+		Background(m.ctx.Theme.Panel).
+		Padding(1, 2)
 }
 
 func (m *Model) visibleTasks() []ast.Task {
-	prev := m.viewDate.Add(-1)
-	next := m.viewDate.AddDate(0, 0, 1).Add(-1)
+	prev := m.Date.Add(-1)
+	next := m.Date.AddDate(0, 0, 1).Add(-1)
 
 	overdue := m.tasks.ListTasks(
 		tasks.FetchAllTasks(),

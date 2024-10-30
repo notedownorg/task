@@ -33,24 +33,24 @@ func renderTask(theme themes.Theme, task ast.Task, selected bool) string {
 		if selected {
 			return s.Padding(0, 1).Background(theme.Green).Foreground(theme.TextCursor).Render(i + "  " + name)
 		}
-		return s.Padding(0, 1).Foreground(theme.Green).Render(i + "  " + name)
+		return s.Padding(0, 1).Background(theme.Panel).Foreground(theme.Green).Render(i + "  " + name)
 	case ast.Todo:
 		if selected {
 			return s.Padding(0, 1).Background(theme.Text).Foreground(theme.TextCursor).Render(i + "  " + name)
 		}
-		return s.Padding(0, 1).Foreground(theme.Text).Render(i + "  " + name)
+		return s.Padding(0, 1).Background(theme.Panel).Foreground(theme.Text).Render(i + "  " + name)
 	case ast.Blocked:
 		if selected {
 			return s.Padding(0, 1).Background(theme.Red).Foreground(theme.TextCursor).Render(i + "  " + name)
 		}
-		return s.Padding(0, 1).Foreground(theme.Red).Render(i + "  " + name)
+		return s.Padding(0, 1).Background(theme.Panel).Foreground(theme.Red).Render(i + "  " + name)
 	case ast.Done, ast.Abandoned:
 		if selected {
 			base := s.Background(theme.TextFaint).Foreground(theme.TextCursor)
 			return base.Padding(0, 1).Render(base.Render(i+"  ") + base.Strikethrough(true).Render(name))
 		}
-		base := s.Foreground(theme.TextFaint)
-		return s.Padding(0, 1).Render(base.Render(i+"  ") + base.Strikethrough(true).Render(name))
+		base := s.Background(theme.Panel).Foreground(theme.TextFaint)
+		return s.Background(theme.Panel).Padding(0, 1).Render(base.Render(i+"  ") + base.Strikethrough(true).Render(name))
 	}
 	slog.Warn("unknown task status", "status", task.Status())
 	return ""
