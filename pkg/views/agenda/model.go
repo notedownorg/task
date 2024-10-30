@@ -16,6 +16,7 @@ package agenda
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
@@ -86,7 +87,7 @@ func (m *Model) View() string {
 	verticalPadding := 1
 	h := lipgloss.Height
 
-	header := fmt.Sprintf("← %v →", m.tasklist.Date.Format("Monday, January 2, 2006"))
+	header := fmt.Sprintf("← %v →", humanizeDate(m.tasklist.Date, time.Now()))
 
 	footer := m.footer.
 		Width(m.ctx.ScreenWidth - horizontalPadding*2).
@@ -100,4 +101,28 @@ func (m *Model) View() string {
 	panel := lipgloss.JoinVertical(lipgloss.Top, header, gap, tasklist, gap, footer)
 
 	return lipgloss.NewStyle().Padding(verticalPadding, horizontalPadding).Render(panel)
+}
+
+func humanizeDate(date time.Time, relativeTo time.Time) string {
+	rel := time.Date(relativeTo.Year(), relativeTo.Month(), relativeTo.Day(), 0, 0, 0, 0, time.UTC)
+	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	diff := date.Sub(rel) / (24 * time.Hour)
+
+	switch diff {
+	case -6, -5, -4, -3, -2:
+		return fmt.Sprintf("Last %s", date.Weekday().String())
+	case -1:
+		return "Yesterday"
+	case 0:
+		return "Today"
+	case 1:
+		return "Tomorrow"
+	case 2, 3, 4, 5, 6:
+		return date.Weekday().String()
+	}
+
+	if date.Year() == relativeTo.Year() {
+		return date.Format("Monday, January 2")
+	}
+	return date.Format("Monday, January 2, 2006")
 }
