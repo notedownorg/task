@@ -50,7 +50,6 @@ func New(ctx *context.ProgramContext, t *tasks.Client, mode Mode) *Model {
 	m := &Model{
 		ctx:   ctx,
 		tasks: t,
-		mode:  adding,
 
 		keyMap: DefaultKeyMap,
 	}
@@ -120,15 +119,22 @@ func (m *Model) View() string {
 	border := lipgloss.RoundedBorder()
 	var b strings.Builder
 	str := "Add-Task"
+	if m.mode == editing {
+		str = "Edit-Task"
+	}
 	for i := len(str) + 2; i <= lipgloss.Width(lines); i++ {
 		b.WriteString(lipgloss.RoundedBorder().Top)
 	}
 	b.WriteString(str)
 	border.Top = b.String()
 
+	color := m.ctx.Theme.Green
+	if m.mode == editing {
+		color = m.ctx.Theme.Yellow
+	}
 	form := lipgloss.NewStyle().
 		Border(border).
-		BorderForeground(m.ctx.Theme.Green).
+		BorderForeground(color).
 		Render(lines)
 
 	width := m.ctx.ScreenWidth - horizontalPadding*2

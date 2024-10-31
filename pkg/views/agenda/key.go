@@ -19,6 +19,7 @@ import "github.com/charmbracelet/bubbles/v2/key"
 type KeyMap struct {
 	TogglePanels key.Binding
 	AddTask      key.Binding
+	EditTask     key.Binding
 
 	NextDay   key.Binding
 	PrevDay   key.Binding
@@ -36,6 +37,10 @@ var DefaultKeyMap = KeyMap{
 	AddTask: key.NewBinding(
 		key.WithKeys("a"),
 		key.WithHelp("a", "add a new task"),
+	),
+	EditTask: key.NewBinding(
+		key.WithKeys("e"),
+		key.WithHelp("e", "edit a task"),
 	),
 	NextDay: key.NewBinding(
 		key.WithKeys("l", "right"),

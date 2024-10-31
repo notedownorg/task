@@ -23,6 +23,7 @@ type Mode func(*Model)
 
 func WithAdd(status ast.Status, text string) Mode {
 	return func(m *Model) {
+		m.mode = adding
 		m.status = NewStatus(m.ctx, status).Focus()
 		m.text = NewText(m.ctx).SetValue(text)
 		m.footer = statusbar.New(m.ctx, statusbar.NewMode("add task", statusbar.ActionCreate), m.tasks)
@@ -34,6 +35,7 @@ func WithAdd(status ast.Status, text string) Mode {
 
 func WithEdit(task ast.Task) Mode {
 	return func(m *Model) {
+		m.mode = editing
 		m.status = NewStatus(m.ctx, task.Status()).Focus()
 		m.text = NewText(m.ctx).SetValue(task.Body())
 		m.footer = statusbar.New(m.ctx, statusbar.NewMode("edit task", statusbar.ActionEdit), m.tasks)

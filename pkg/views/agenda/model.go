@@ -84,6 +84,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.tasks,
 				taskeditor.WithAdd(ast.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02"))),
 			))
+		case key.Matches(msg, m.keyMap.EditTask):
+			task := m.tasklist.Selected()
+			if m.completed.Focused() {
+				task = m.completed.Selected()
+			}
+			if task != nil {
+				return m.ctx.Navigate(m, taskeditor.New(
+					m.ctx,
+					m.tasks,
+					taskeditor.WithEdit(*task),
+				))
+			}
 		case key.Matches(msg, m.keyMap.NextDay):
 			m.updateDate(m.date.AddDate(0, 0, 1))
 		case key.Matches(msg, m.keyMap.PrevDay):
