@@ -133,6 +133,19 @@ func (m *Model[T]) Height(i int) *Model[T] {
 	return m
 }
 
+func (m Model[T]) Selected() *T {
+	index := 0
+	for _, group := range m.groups {
+		for _, item := range group.Items {
+			if index == m.cursor {
+				return &item
+			}
+			index++
+		}
+	}
+	return nil // I think this is only possible when there are no items?
+}
+
 // there are various optimizations that could be made here
 // right now we just re-render everything
 func (m *Model[T]) updateViewport() {
