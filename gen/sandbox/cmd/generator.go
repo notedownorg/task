@@ -28,6 +28,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
 	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/tjarratt/babble"
 )
 
 func GenerateWorkspace(root string, maxFiles int, maxTasks int) {
@@ -75,12 +76,21 @@ func genTask(client *tasks.Client, file string, index int) {
 		opts = append(opts, ast.WithDue(time.Now().AddDate(0, 0, chance)))
 	}
 
+	// Random priority 0 to 10 or none at all (-1)
+	chance = rand.Intn(11) - 1
+	if chance > -1 {
+		opts = append(opts, ast.WithPriority(chance))
+	}
+
 	// If completed we need to set the completed date to a random date in the last 3 days
 	if status == ast.Done {
 		opts = append(opts, ast.WithCompleted(time.Now().AddDate(0, 0, -rand.Intn(3))))
 	}
 
-	if err := client.Create(file, fmt.Sprintf("Task %d", index), status, opts...); err != nil {
+	babbler := babble.NewBabbler()
+	babbler.Count = rand.Intn(6) + 1
+	babbler.Separator = " "
+	if err := client.Create(file, fmt.Sprintf("%v", babbler.Babble()), status, opts...); err != nil {
 		slog.Error("failed to create task", "file", file, "error", err)
 	}
 
