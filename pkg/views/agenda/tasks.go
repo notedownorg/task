@@ -21,7 +21,7 @@ import (
 )
 
 func (m *Model) visibleTasks() []groupedlist.Group[ast.Task] {
-	prev := m.date.Add(-1)
+	// prev := m.date.Add(-1)
 	next := m.date.AddDate(0, 0, 1).Add(-1)
 
 	overdue := m.tasks.ListTasks(
@@ -51,16 +51,17 @@ func (m *Model) visibleTasks() []groupedlist.Group[ast.Task] {
 		}
 	}
 
-	done := m.tasks.ListTasks(
-		tasks.FetchAllTasks(),
-		tasks.WithFilters(
-			tasks.FilterByStatus(ast.Done),
-			tasks.FilterByCompletedDate(&prev, &next),
-		),
-		tasks.WithSorters(tasks.SortByAlphabetical()),
-	)
+	// TODO: Move to right pane
+	// done := m.tasks.ListTasks(
+	// 	tasks.FetchAllTasks(),
+	// 	tasks.WithFilters(
+	// 		tasks.FilterByStatus(ast.Done),
+	// 		tasks.FilterByCompletedDate(&prev, &next),
+	// 	),
+	// 	tasks.WithSorters(tasks.SortByAlphabetical()),
+	// )
 
-	return []groupedlist.Group[ast.Task]{doing, todo, blocked, {Name: statusName[ast.Done], Items: done}}
+	return []groupedlist.Group[ast.Task]{doing, todo, blocked}
 }
 
 var statusName = map[ast.Status]string{
