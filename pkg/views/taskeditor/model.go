@@ -20,7 +20,6 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
@@ -47,20 +46,16 @@ type Model struct {
 	footer *statusbar.Model
 }
 
-func NewAddModel(ctx *context.ProgramContext, t *tasks.Client) *Model {
-	return &Model{
+func New(ctx *context.ProgramContext, t *tasks.Client, mode Mode) *Model {
+	m := &Model{
 		ctx:   ctx,
 		tasks: t,
 		mode:  adding,
 
 		keyMap: DefaultKeyMap,
-
-		status: NewStatus(ctx, ast.Todo).Focus(),
-		text:   NewText(ctx),
-		fields: NewFields(ctx),
-
-		footer: statusbar.New(ctx, statusbar.NewMode("add task", statusbar.ActionCreate), t),
 	}
+	mode(m)
+	return m
 }
 
 func (m *Model) Init() (tea.Model, tea.Cmd) {
