@@ -21,7 +21,7 @@ import (
 
 func main() {
 	tmp, _ := os.MkdirTemp("", "task-sandbox")
-	files, tasks := 10, 100
+	files, tasks := 10, 1000
 
 	GenerateWorkspace(tmp, files, tasks)
 

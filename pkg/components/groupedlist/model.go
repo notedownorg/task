@@ -43,10 +43,9 @@ type Model[T any] struct {
 	totalItems int
 	renderers  Renderers[T]
 
-	cursor   int
-	viewport viewport.Model
-	start    int
-	end      int
+	cursor         int // index of the selected item
+	cursorAbsolute int // index of the position in the viewport content
+	viewport       viewport.Model
 }
 
 func New[T any](opts ...Option[T]) *Model[T] {
@@ -66,18 +65,44 @@ func (m *Model[T]) SetGroups(groups []Group[T]) {
 	for _, g := range groups {
 		m.totalItems += len(g.Items)
 	}
+
+	// Reset the cursor if it's now out of bounds
 	m.cursor = clamp(m.cursor, 0, m.totalItems-1)
+
 	m.updateViewport()
+
+	// Ensure the viewport finishes at the bottom of the content (no trailing whitespace)
+	if m.viewport.YOffset > m.viewport.TotalLineCount()-m.viewport.Height {
+		m.viewport.SetYOffset(m.viewport.TotalLineCount() - m.viewport.Height)
+	}
+
+	// If the cursor is now outside of the visible viewport, adjust the YOffset to make it visible
+	if m.cursorAbsolute > m.viewport.YOffset+m.viewport.Height-1 || m.cursorAbsolute < m.viewport.YOffset {
+		m.viewport.SetYOffset(m.cursorAbsolute - m.viewport.Height/2)
+	}
 }
 
 func (m *Model[T]) MoveUp(n int) {
 	m.cursor = clamp(m.cursor-n, 0, m.totalItems-1)
 	m.updateViewport()
+
+	// TODO: Come up with a better way to handle scrolling?
+	// Start scrolling if the cursor is roughly above the middle of the viewport
+	if m.cursorAbsolute < m.viewport.TotalLineCount()-(m.viewport.Height/2) {
+		m.viewport.SetYOffset(m.viewport.YOffset - n)
+	}
 }
 
 func (m *Model[T]) MoveDown(n int) {
 	m.cursor = clamp(m.cursor+n, 0, m.totalItems-1)
 	m.updateViewport()
+
+	// TODO: Come up with a better way to handle scrolling?
+	// Start scrolling if the cursor is roughly below the middle of the viewport
+	if m.cursorAbsolute > m.viewport.Height/2 {
+		m.viewport.SetYOffset(m.viewport.YOffset + n)
+	}
+
 }
 
 func (m *Model[T]) Width(i int) *Model[T] {
@@ -109,6 +134,7 @@ func (m *Model[T]) updateViewport() {
 			for i := 0; i < len(group.Items); i++ {
 				if itemIndex == m.cursor {
 					renderedLines = m.renderSelected(renderedLines, groupIndex, i)
+					m.cursorAbsolute = len(renderedLines) - 1
 				} else {
 					renderedLines = m.renderItem(renderedLines, groupIndex, i)
 				}
