@@ -43,6 +43,7 @@ type Model[T any] struct {
 	totalItems int
 	renderers  Renderers[T]
 
+	focus          bool
 	cursor         int // index of the selected item
 	cursorAbsolute int // index of the position in the viewport content
 	viewport       viewport.Model
@@ -102,7 +103,22 @@ func (m *Model[T]) MoveDown(n int) {
 	if m.cursorAbsolute > m.viewport.Height/2 {
 		m.viewport.SetYOffset(m.viewport.YOffset + n)
 	}
+}
 
+func (m *Model[T]) Focus() *Model[T] {
+	m.focus = true
+	m.updateViewport()
+	return m
+}
+
+func (m Model[T]) Focused() bool {
+	return m.focus
+}
+
+func (m *Model[T]) Blur() *Model[T] {
+	m.focus = false
+	m.updateViewport()
+	return m
 }
 
 func (m *Model[T]) Width(i int) *Model[T] {
@@ -132,7 +148,7 @@ func (m *Model[T]) updateViewport() {
 		if len(group.Items) != 0 {
 			renderedLines = m.renderHeader(renderedLines, groupIndex)
 			for i := 0; i < len(group.Items); i++ {
-				if itemIndex == m.cursor {
+				if itemIndex == m.cursor && m.focus {
 					renderedLines = m.renderSelected(renderedLines, groupIndex, i)
 					m.cursorAbsolute = len(renderedLines) - 1
 				} else {

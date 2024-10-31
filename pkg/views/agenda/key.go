@@ -17,7 +17,8 @@ package agenda
 import "github.com/charmbracelet/bubbles/v2/key"
 
 type KeyMap struct {
-	AddTask key.Binding
+	TogglePanels key.Binding
+	AddTask      key.Binding
 
 	NextDay   key.Binding
 	PrevDay   key.Binding
@@ -28,6 +29,10 @@ type KeyMap struct {
 }
 
 var DefaultKeyMap = KeyMap{
+	TogglePanels: key.NewBinding(
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "toggle main list and completed tasks"),
+	),
 	AddTask: key.NewBinding(
 		key.WithKeys("a"),
 		key.WithHelp("a", "add a new task"),
