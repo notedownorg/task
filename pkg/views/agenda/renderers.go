@@ -26,7 +26,7 @@ import (
 	"github.com/notedownorg/task/pkg/themes"
 )
 
-func rendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
+func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 	s := lipgloss.NewStyle()
 	paddingHorizontal := 2
 
@@ -40,10 +40,8 @@ func rendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 					return theme.Text
 				case "Blocked":
 					return theme.Red
-				case "Done", "Abandoned":
-					return theme.TextFaint
 				default:
-					slog.Warn("unknown task status", "status", s)
+					slog.Warn("unexpected task status", "status", s)
 					return theme.Text
 				}
 			}(name)
@@ -69,7 +67,11 @@ func rendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 		},
 
 		Item: func(task ast.Task, width int) string {
-			fields := parts(task)
+			fields := []string{
+				icon(task.Status()),
+				lipgloss.NewStyle().Width(70).Render(runewidth.Truncate(task.Name(), 70, "…")),
+				priority(task),
+			}
 
 			switch task.Status() {
 			case ast.Doing:
@@ -78,16 +80,17 @@ func rendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Panel).Foreground(theme.Text).Render(strings.Join(fields, "  "))
 			case ast.Blocked:
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Panel).Foreground(theme.Red).Render(strings.Join(fields, "  "))
-			case ast.Done, ast.Abandoned:
-				base := s.Background(theme.Panel).Foreground(theme.TextFaint)
-				return s.Width(width).Background(theme.Panel).Padding(0, paddingHorizontal).Render(base.Render(fields[0]+"  ") + base.Strikethrough(true).Render(fields[1]))
 			}
 			slog.Warn("unknown task status", "status", task.Status())
 			return ""
 		},
 
 		Selected: func(task ast.Task, width int) string {
-			fields := parts(task)
+			fields := []string{
+				icon(task.Status()),
+				lipgloss.NewStyle().Width(70).Render(runewidth.Truncate(task.Name(), 70, "…")),
+				priority(task),
+			}
 
 			switch task.Status() {
 			case ast.Doing:
@@ -107,10 +110,61 @@ func rendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 	}
 }
 
-func parts(task ast.Task) []string {
+func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
+	s := lipgloss.NewStyle()
+	paddingHorizontal := 2
+
+	return groupedlist.Renderers[ast.Task]{
+		Header: func(name string, width int) string {
+			return lipgloss.JoinVertical(lipgloss.Top,
+				s.Margin(0, 0, 1, 0).
+					Background(theme.TextFaint).
+					Foreground(theme.TextCursor).
+					Bold(true).
+					Padding(0, paddingHorizontal).
+					Render(strings.ToUpper(name)),
+				s.Width(width).Background(theme.Panel).
+					Render(""),
+			)
+		},
+		Footer: func(name string, width int) string {
+			return lipgloss.JoinVertical(lipgloss.Bottom,
+				s.Width(width).Background(theme.Panel).
+					Render(""),
+				"",
+			)
+		},
+		Item: func(task ast.Task, width int) string {
+			fields := parts(task, width-8)
+
+			switch task.Status() {
+			case ast.Done, ast.Abandoned:
+				base := s.Background(theme.Panel).Foreground(theme.TextFaint)
+				return s.Width(width).Background(theme.Panel).Padding(0, paddingHorizontal).Render(base.Render(fields[0]+"  ") + base.Strikethrough(true).Render(fields[1]))
+			}
+
+			slog.Warn("unexpected task status", "status", task.Status())
+			return ""
+		},
+		Selected: func(task ast.Task, width int) string {
+			fields := parts(task, width-8)
+
+			switch task.Status() {
+			case ast.Done, ast.Abandoned:
+				base := s.Background(theme.TextFaint).Foreground(theme.TextCursor)
+				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.TextFaint).Render(base.Render(fields[0]+"  ") + base.Strikethrough(true).Render(fields[1]))
+			}
+
+			slog.Warn("unexpected task status", "status", task.Status())
+			return ""
+		},
+	}
+}
+
+func parts(task ast.Task, trunc int) []string {
 	res := []string{
 		icon(task.Status()),
-		lipgloss.NewStyle().Width(70).Render(runewidth.Truncate(task.Name(), 70, "…")),
+		lipgloss.NewStyle().Width(trunc).Render(runewidth.Truncate(task.Name(), trunc, "…")),
 	}
 	if task.Priority() != nil {
 		res = append(res, fmt.Sprintf(" %d", *task.Priority()))
@@ -118,6 +172,13 @@ func parts(task ast.Task) []string {
 		res = append(res, "   ")
 	}
 	return res
+}
+
+func priority(task ast.Task) string {
+	if task.Priority() != nil {
+		return fmt.Sprintf(" %d", *task.Priority())
+	}
+	return "   "
 }
 
 func icon(status ast.Status) string {

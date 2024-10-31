@@ -41,10 +41,11 @@ func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
 		keyMap: DefaultKeyMap,
 		date:   time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC),
 
-		tasklist: groupedlist.New[ast.Task](groupedlist.WithRenderers(rendererFuncs(ctx.Theme))),
-		footer:   statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
+		tasklist:  groupedlist.New[ast.Task](groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme))).Focus(),
+		completed: groupedlist.New[ast.Task](groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
+		footer:    statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
 	}
-	m.tasklist.SetGroups(m.visibleTasks())
+	m.updateTasks()
 	return m
 }
 
@@ -55,8 +56,9 @@ type Model struct {
 	keyMap KeyMap
 	date   time.Time
 
-	tasklist *groupedlist.Model[ast.Task]
-	footer   *statusbar.Model
+	tasklist  *groupedlist.Model[ast.Task]
+	completed *groupedlist.Model[ast.Task]
+	footer    *statusbar.Model
 }
 
 func (m *Model) Init() (tea.Model, tea.Cmd) {
@@ -74,6 +76,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, m.keyMap.TogglePanels):
+			m.togglePanels()
 		case key.Matches(msg, m.keyMap.AddTask):
 			return m.ctx.Navigate(m, taskeditor.NewAddModel(m.ctx, m.tasks))
 		case key.Matches(msg, m.keyMap.NextDay):
@@ -83,25 +87,52 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.ResetDate):
 			m.date = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC)
 		case key.Matches(msg, m.keyMap.CursorUp):
-			m.tasklist.MoveUp(1)
+			m.moveUp(1)
 		case key.Matches(msg, m.keyMap.CursorDown):
-			m.tasklist.MoveDown(1)
+			m.moveDown(1)
 		}
 	}
 
 	return m, cmd
 }
 
+func (m *Model) togglePanels() {
+	if m.tasklist.Focused() {
+		m.tasklist.Blur()
+		m.completed.Focus()
+	} else {
+		m.completed.Blur()
+		m.tasklist.Focus()
+	}
+}
+
+func (m *Model) moveUp(n int) {
+	if m.tasklist.Focused() {
+		m.tasklist.MoveUp(n)
+	} else {
+		m.completed.MoveUp(n)
+	}
+}
+
+func (m *Model) moveDown(n int) {
+	if m.tasklist.Focused() {
+		m.tasklist.MoveDown(n)
+	} else {
+		m.completed.MoveDown(n)
+	}
+}
+
 func (m *Model) updateDate(date time.Time) {
 	m.date = date
-	m.tasklist.SetGroups(m.visibleTasks())
+	m.updateTasks()
 }
 
 func (m *Model) View() string {
-	gap := ""
+	gap := "   "
 	horizontalPadding := 2
 	verticalPadding := 1
 	h := lipgloss.Height
+	w := lipgloss.Width
 
 	header := fmt.Sprintf("← %v →", humanizeDate(m.date, time.Now()))
 
@@ -109,12 +140,18 @@ func (m *Model) View() string {
 		Width(m.ctx.ScreenWidth - horizontalPadding*2).
 		View()
 
-	tasklist := m.tasklist.
+	completed := m.completed.
 		Height(m.ctx.ScreenHeight - h(footer) - h(header) - verticalPadding*2 - 2). // -2 for the gaps
-		Width(m.ctx.ScreenWidth - horizontalPadding*2).
+		Width(m.ctx.ScreenWidth/4 - horizontalPadding*2).
 		View()
 
-	panel := lipgloss.JoinVertical(lipgloss.Top, header, gap, tasklist, gap, footer)
+	tasklist := m.tasklist.
+		Height(m.ctx.ScreenHeight - h(footer) - h(header) - verticalPadding*2 - 2). // -2 for the gaps
+		Width(m.ctx.ScreenWidth - w(completed) - horizontalPadding*2 - 3).          // -3 for the gap
+		View()
+
+	main := lipgloss.JoinHorizontal(lipgloss.Left, tasklist, gap, completed)
+	panel := lipgloss.JoinVertical(lipgloss.Top, header, gap, main, gap, footer)
 
 	return lipgloss.NewStyle().Padding(verticalPadding, horizontalPadding).Render(panel)
 }
