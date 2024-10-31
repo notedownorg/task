@@ -68,8 +68,8 @@ github.com/muesli/cancelreader v0.2.2 h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELU
 github.com/muesli/cancelreader v0.2.2/go.mod h1:3XuTXfFS2VjM+HTLZY9Ak0l6eUKfijIfMUZ4EgX0QYo=
 github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo=
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
-github.com/notedownorg/notedown v0.0.0-20241028212414-5f0259f17f35 h1:woJ+/Mh4EShJ5SZscGlJC0LEHEm+jIat0Ogyb64Ojac=
-github.com/notedownorg/notedown v0.0.0-20241028212414-5f0259f17f35/go.mod h1:gtN8pq5eQ9K9FYYxX5Uk0BrRLFW1u85peUNbmp5RNuo=
+github.com/notedownorg/notedown v0.0.0-20241031203850-f685110f7ce4 h1:dp4Dd3cajCBRQKJvsXa5OHZ4y+2cQ551BqP5j/0VIzY=
+github.com/notedownorg/notedown v0.0.0-20241031203850-f685110f7ce4/go.mod h1:gtN8pq5eQ9K9FYYxX5Uk0BrRLFW1u85peUNbmp5RNuo=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=

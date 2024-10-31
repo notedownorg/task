@@ -74,8 +74,9 @@ func (t Text) Value() string {
 	return t.ti.Value()
 }
 
-func (t *Text) SetValue(s string) {
+func (t *Text) SetValue(s string) *Text {
 	t.ti.SetValue(s)
+	return t
 }
 
 func (t Text) Cursor() int {
