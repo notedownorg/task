@@ -135,7 +135,10 @@ func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] 
 			)
 		},
 		Item: func(task ast.Task, width int) string {
-			fields := parts(task, width-8)
+			fields := []string{
+				icon(task.Status()),
+				lipgloss.NewStyle().Render(runewidth.Truncate(task.Name(), width-paddingHorizontal*2-3, "…")), // need to account for icon and padding
+			}
 
 			switch task.Status() {
 			case ast.Done, ast.Abandoned:
@@ -147,7 +150,10 @@ func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] 
 			return ""
 		},
 		Selected: func(task ast.Task, width int) string {
-			fields := parts(task, width-8)
+			fields := []string{
+				icon(task.Status()),
+				lipgloss.NewStyle().Render(runewidth.Truncate(task.Name(), width-paddingHorizontal*2-3, "…")), // need to account for icon and padding
+			}
 
 			switch task.Status() {
 			case ast.Done, ast.Abandoned:
@@ -159,19 +165,6 @@ func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] 
 			return ""
 		},
 	}
-}
-
-func parts(task ast.Task, trunc int) []string {
-	res := []string{
-		icon(task.Status()),
-		lipgloss.NewStyle().Width(trunc).Render(runewidth.Truncate(task.Name(), trunc, "…")),
-	}
-	if task.Priority() != nil {
-		res = append(res, fmt.Sprintf(" %d", *task.Priority()))
-	} else {
-		res = append(res, "   ")
-	}
-	return res
 }
 
 func priority(task ast.Task) string {
