@@ -26,6 +26,7 @@ import (
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
+	"github.com/notedownorg/task/pkg/listeners"
 	"github.com/notedownorg/task/pkg/views/taskeditor"
 )
 
@@ -85,16 +86,20 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				taskeditor.WithAdd(ast.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02"))),
 			))
 		case key.Matches(msg, m.keyMap.EditTask):
-			task := m.tasklist.Selected()
-			if m.completed.Focused() {
-				task = m.completed.Selected()
-			}
-			if task != nil {
+			selected := m.selectedTask()
+			if selected != nil {
 				return m.ctx.Navigate(m, taskeditor.New(
 					m.ctx,
 					m.tasks,
-					taskeditor.WithEdit(*task),
+					taskeditor.WithEdit(*selected),
 				))
+			}
+		case key.Matches(msg, m.keyMap.DeleteTask):
+			selected := m.selectedTask()
+			if selected != nil {
+				if err := m.tasks.Delete(*selected); err != nil {
+					m.footer.SetMessage(fmt.Sprintf("error deleting task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
+				}
 			}
 		case key.Matches(msg, m.keyMap.NextDay):
 			m.updateDate(m.date.AddDate(0, 0, 1))
@@ -109,7 +114,19 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	// If the task client has emitted an event, update the tasks
+	if _, ok := msg.(listeners.TaskEvent); ok {
+		m.updateTasks()
+	}
+
 	return m, cmd
+}
+
+func (m *Model) selectedTask() *ast.Task {
+	if m.completed.Focused() {
+		return m.completed.Selected()
+	}
+	return m.tasklist.Selected()
 }
 
 func (m *Model) togglePanels() {

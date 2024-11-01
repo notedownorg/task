@@ -17,6 +17,7 @@ package statusbar
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
@@ -66,6 +67,10 @@ type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
 
+	message       string
+	messageExpire time.Time
+	messageColor  lipgloss.Color
+
 	mode Mode
 }
 
@@ -85,6 +90,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m *Model) SetMessage(message string, until time.Time, color lipgloss.Color) *Model {
+	m.messageExpire = until
+	m.message = message
+	m.messageColor = color
+	return m
+}
+
 func (m *Model) Width(width int) *Model {
 	m.base.Width(width)
 	return m
@@ -96,18 +108,21 @@ func (m *Model) Margin(margin ...int) *Model {
 }
 
 func (m *Model) View() string {
-	stats := fmt.Sprintf("󰄬 %d 󰢨 %d 󰧮 %d",
-		len(m.tasks.ListTasks(tasks.FetchAllTasks())),
-		len(m.tasks.ListDocuments(tasks.FetchAllDocuments(), tasks.FilterByDocumentType("project"))),
-		len(m.tasks.ListDocuments(tasks.FetchAllDocuments())),
-	)
+	// These should probably be part of update
+	now := time.Now()
+	if now.After(m.messageExpire) {
+		m.message = ""
+	}
+
+	t, d := m.tasks.Summary()
+	stats := fmt.Sprintf("󰄬 %d 󰧮 %d", t, d)
 
 	statsBlock := statsStyle(m.ctx.Theme).Render(stats)
 	modeBlock := modeStyle(m.mode)(m.ctx.Theme).Render(strings.ToUpper(m.mode.text))
 
 	w := lipgloss.Width
 	statusBlockWidth := m.base.AvailableWidth() - w(statsBlock) - w(modeBlock)
-	statusBlock := textStyle(m.ctx.Theme).Width(statusBlockWidth).Render("")
+	statusBlock := textStyle(m.ctx.Theme).Foreground(m.messageColor).Align(lipgloss.Center).Width(statusBlockWidth).Render(m.message)
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		modeBlock,
