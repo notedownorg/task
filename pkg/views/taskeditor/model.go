@@ -39,9 +39,10 @@ type Model struct {
 
 	keyMap KeyMap
 
-	status *Status
-	text   *Text
-	fields *Fields
+	status   *Status
+	text     *Text
+	fields   *Fields
+	location *Location
 
 	footer *statusbar.Model
 }
@@ -94,6 +95,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) View() string {
 	horizontalPadding := 2
 	verticalMargin := 1
+	w := lipgloss.Width
 
 	footer := m.footer.
 		Width(m.ctx.ScreenWidth-horizontalPadding*2).
@@ -109,11 +111,21 @@ func (m *Model) View() string {
 
 	fields := lipgloss.NewStyle().
 		Margin(0, 3, 1, 3).
+		PaddingTop(1).
+		Width(w(status)+w(text)).
+		Border(lipgloss.NormalBorder(), true, false, false, false).
+		BorderForeground(m.ctx.Theme.BorderFaint).
 		Render(m.fields.View())
+
+	location := lipgloss.NewStyle().
+		Margin(0, 3, 1, 3).
+		Foreground(m.ctx.Theme.TextFaint).
+		Render(m.location.View())
 
 	lines := lipgloss.JoinVertical(lipgloss.Top,
 		top,
 		fields,
+		location,
 	)
 
 	border := lipgloss.RoundedBorder()
