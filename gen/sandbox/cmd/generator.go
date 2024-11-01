@@ -64,12 +64,12 @@ func GenerateWorkspace(root string, maxFiles int, maxTasks int) {
 var statuses = []ast.Status{ast.Todo, ast.Doing, ast.Blocked, ast.Done, ast.Abandoned}
 
 func genTask(client *tasks.Client, file string, index int) {
+	opts := []ast.TaskOption{ast.WithLine(writer.AT_END)}
+
 	// Random status
 	status := statuses[rand.Intn(len(statuses))]
 
 	// Randomly add other fields
-	var opts []ast.TaskOption
-
 	// Random due date -1 to +6 days or none at all (-2)
 	chance := rand.Intn(9) - 2
 	if chance > -2 {

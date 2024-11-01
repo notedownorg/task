@@ -20,6 +20,7 @@ type KeyMap struct {
 	TogglePanels key.Binding
 	AddTask      key.Binding
 	EditTask     key.Binding
+	DeleteTask   key.Binding
 
 	NextDay   key.Binding
 	PrevDay   key.Binding
@@ -41,6 +42,10 @@ var DefaultKeyMap = KeyMap{
 	EditTask: key.NewBinding(
 		key.WithKeys("e"),
 		key.WithHelp("e", "edit a task"),
+	),
+	DeleteTask: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "delete a task"),
 	),
 	NextDay: key.NewBinding(
 		key.WithKeys("l", "right"),

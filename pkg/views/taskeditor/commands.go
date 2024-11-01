@@ -24,7 +24,7 @@ import (
 
 func (m *Model) submit() (tea.Model, tea.Cmd) {
 	// Create is intentionally run syncronously to prevent losing progress on error
-	if err := m.tasks.Create("README.md", m.text.Value(), m.status.Value(), ast.WithLine(writer.AtEnd)); err != nil {
+	if err := m.tasks.Create("README.md", m.text.Value(), m.status.Value(), ast.WithLine(writer.AT_END)); err != nil {
 		slog.Error("failed to create task", "error", err)
 
 		// TODO: We should probably show an error message to the user
