@@ -28,6 +28,7 @@ func WithAdd(status ast.Status, text string) Mode {
 		m.text = NewText(m.ctx).SetValue(text)
 		m.footer = statusbar.New(m.ctx, statusbar.NewMode("add task", statusbar.ActionCreate), m.tasks)
 		m.fields = NewFields(m.ctx)
+		m.location = NewLocation(m.ctx)
 		m.text.SetCursor(0)
 		m.parseTask()
 	}
@@ -40,6 +41,7 @@ func WithEdit(task ast.Task) Mode {
 		m.text = NewText(m.ctx).SetValue(task.Body())
 		m.footer = statusbar.New(m.ctx, statusbar.NewMode("edit task", statusbar.ActionEdit), m.tasks)
 		m.fields = NewFields(m.ctx)
+		m.location = NewLocation(m.ctx).SetLocation(task.Path(), task.Line())
 		m.text.SetCursor(0)
 		m.parseTask()
 	}
