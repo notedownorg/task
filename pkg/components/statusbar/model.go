@@ -21,7 +21,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
 	"github.com/notedownorg/task/pkg/themes"
@@ -114,8 +114,8 @@ func (m *Model) View() string {
 		m.message = ""
 	}
 
-	t, d := m.tasks.Summary()
-	stats := fmt.Sprintf("󰄬 %d 󰧮 %d", t, d)
+	t := m.tasks.Summary()
+	stats := fmt.Sprintf("󰄬 %d", t)
 
 	statsBlock := statsStyle(m.ctx.Theme).Render(stats)
 	modeBlock := modeStyle(m.mode)(m.ctx.Theme).Render(strings.ToUpper(m.mode.text))

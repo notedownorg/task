@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
 )
@@ -28,11 +28,11 @@ type Status struct {
 
 	ctx *context.ProgramContext
 
-	value   ast.Status
+	value   tasks.Status
 	focused bool
 }
 
-func NewStatus(ctx *context.ProgramContext, value ast.Status) *Status {
+func NewStatus(ctx *context.ProgramContext, value tasks.Status) *Status {
 	return &Status{
 		ctx:   ctx,
 		value: value,
@@ -51,15 +51,15 @@ func (s *Status) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case " ", "space":
-			s.value = ast.Todo
+			s.value = tasks.Todo
 		case "b", "B":
-			s.value = ast.Blocked
+			s.value = tasks.Blocked
 		case "/":
-			s.value = ast.Doing
+			s.value = tasks.Doing
 		case "x", "X":
-			s.value = ast.Done
+			s.value = tasks.Done
 		case "a", "A":
-			s.value = ast.Abandoned
+			s.value = tasks.Abandoned
 		}
 	}
 
@@ -76,11 +76,11 @@ func (s *Status) Blur() *Status {
 	return s
 }
 
-func (s Status) Value() ast.Status {
+func (s Status) Value() tasks.Status {
 	return s.value
 }
 
-func (s *Status) SetValue(value ast.Status) {
+func (s *Status) SetValue(value tasks.Status) {
 	s.value = value
 }
 

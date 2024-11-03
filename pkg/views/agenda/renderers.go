@@ -21,16 +21,16 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mattn/go-runewidth"
-	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
-func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
+func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[tasks.Task] {
 	s := lipgloss.NewStyle()
 	paddingHorizontal := 2
 
-	return groupedlist.Renderers[ast.Task]{
+	return groupedlist.Renderers[tasks.Task]{
 		Header: func(name string, width int) string {
 			bg := func(s string) lipgloss.Color {
 				switch s {
@@ -66,7 +66,7 @@ func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 			)
 		},
 
-		Item: func(task ast.Task, width int) string {
+		Item: func(task tasks.Task, width int) string {
 			fields := []string{
 				icon(task.Status()),
 				lipgloss.NewStyle().Width(70).Render(runewidth.Truncate(task.Name(), 70, "…")),
@@ -74,18 +74,18 @@ func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 			}
 
 			switch task.Status() {
-			case ast.Doing:
+			case tasks.Doing:
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Panel).Foreground(theme.Green).Render(strings.Join(fields, "  "))
-			case ast.Todo:
+			case tasks.Todo:
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Panel).Foreground(theme.Text).Render(strings.Join(fields, "  "))
-			case ast.Blocked:
+			case tasks.Blocked:
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Panel).Foreground(theme.Red).Render(strings.Join(fields, "  "))
 			}
 			slog.Warn("unknown task status", "status", task.Status())
 			return ""
 		},
 
-		Selected: func(task ast.Task, width int) string {
+		Selected: func(task tasks.Task, width int) string {
 			fields := []string{
 				icon(task.Status()),
 				lipgloss.NewStyle().Width(70).Render(runewidth.Truncate(task.Name(), 70, "…")),
@@ -93,13 +93,13 @@ func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 			}
 
 			switch task.Status() {
-			case ast.Doing:
+			case tasks.Doing:
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Green).Foreground(theme.TextCursor).Render(strings.Join(fields, "  "))
-			case ast.Todo:
+			case tasks.Todo:
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Text).Foreground(theme.TextCursor).Render(strings.Join(fields, "  "))
-			case ast.Blocked:
+			case tasks.Blocked:
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.Red).Foreground(theme.TextCursor).Render(strings.Join(fields, "  "))
-			case ast.Done, ast.Abandoned:
+			case tasks.Done, tasks.Abandoned:
 				base := s.Background(theme.TextFaint).Foreground(theme.TextCursor)
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.TextFaint).Render(base.Render(fields[0]+"  ") + base.Strikethrough(true).Render(fields[1]))
 			}
@@ -110,11 +110,11 @@ func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
 	}
 }
 
-func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] {
+func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[tasks.Task] {
 	s := lipgloss.NewStyle()
 	paddingHorizontal := 2
 
-	return groupedlist.Renderers[ast.Task]{
+	return groupedlist.Renderers[tasks.Task]{
 		Header: func(name string, width int) string {
 			return lipgloss.JoinVertical(lipgloss.Top,
 				s.Margin(0, 0, 1, 0).
@@ -134,14 +134,14 @@ func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] 
 				"",
 			)
 		},
-		Item: func(task ast.Task, width int) string {
+		Item: func(task tasks.Task, width int) string {
 			fields := []string{
 				icon(task.Status()),
 				lipgloss.NewStyle().Render(runewidth.Truncate(task.Name(), width-paddingHorizontal*2-3, "…")), // need to account for icon and padding
 			}
 
 			switch task.Status() {
-			case ast.Done, ast.Abandoned:
+			case tasks.Done, tasks.Abandoned:
 				base := s.Background(theme.Panel).Foreground(theme.TextFaint)
 				return s.Width(width).Background(theme.Panel).Padding(0, paddingHorizontal).Render(base.Render(fields[0]+"  ") + base.Strikethrough(true).Render(fields[1]))
 			}
@@ -149,14 +149,14 @@ func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] 
 			slog.Warn("unexpected task status", "status", task.Status())
 			return ""
 		},
-		Selected: func(task ast.Task, width int) string {
+		Selected: func(task tasks.Task, width int) string {
 			fields := []string{
 				icon(task.Status()),
 				lipgloss.NewStyle().Render(runewidth.Truncate(task.Name(), width-paddingHorizontal*2-3, "…")), // need to account for icon and padding
 			}
 
 			switch task.Status() {
-			case ast.Done, ast.Abandoned:
+			case tasks.Done, tasks.Abandoned:
 				base := s.Background(theme.TextFaint).Foreground(theme.TextCursor)
 				return s.Width(width).Padding(0, paddingHorizontal).Background(theme.TextFaint).Render(base.Render(fields[0]+"  ") + base.Strikethrough(true).Render(fields[1]))
 			}
@@ -167,24 +167,24 @@ func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[ast.Task] 
 	}
 }
 
-func priority(task ast.Task) string {
+func priority(task tasks.Task) string {
 	if task.Priority() != nil {
 		return fmt.Sprintf(" %d", *task.Priority())
 	}
 	return "   "
 }
 
-func icon(status ast.Status) string {
+func icon(status tasks.Status) string {
 	switch status {
-	case ast.Todo:
+	case tasks.Todo:
 		return ""
-	case ast.Blocked:
+	case tasks.Blocked:
 		return ""
-	case ast.Doing:
+	case tasks.Doing:
 		return ""
-	case ast.Done:
+	case tasks.Done:
 		return ""
-	case ast.Abandoned:
+	case tasks.Abandoned:
 		return ""
 	default:
 		slog.Warn("unknown task status", "status", status)

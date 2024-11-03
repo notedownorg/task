@@ -21,9 +21,9 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
-	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/fileserver/writer"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 

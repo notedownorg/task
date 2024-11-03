@@ -21,8 +21,7 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/ast"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
@@ -42,8 +41,8 @@ func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
 		keyMap: DefaultKeyMap,
 		date:   time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC),
 
-		tasklist:  groupedlist.New[ast.Task](groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme))).Focus(),
-		completed: groupedlist.New[ast.Task](groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
+		tasklist:  groupedlist.New[tasks.Task](groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme))).Focus(),
+		completed: groupedlist.New[tasks.Task](groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
 		footer:    statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
 	}
 	m.updateTasks()
@@ -57,8 +56,8 @@ type Model struct {
 	keyMap KeyMap
 	date   time.Time
 
-	tasklist  *groupedlist.Model[ast.Task]
-	completed *groupedlist.Model[ast.Task]
+	tasklist  *groupedlist.Model[tasks.Task]
+	completed *groupedlist.Model[tasks.Task]
 	footer    *statusbar.Model
 }
 
@@ -83,7 +82,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.ctx.Navigate(m, taskeditor.New(
 				m.ctx,
 				m.tasks,
-				taskeditor.WithAdd(ast.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02"))),
+				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02"))),
 			))
 		case key.Matches(msg, m.keyMap.EditTask):
 			selected := m.selectedTask()
@@ -122,7 +121,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *Model) selectedTask() *ast.Task {
+func (m *Model) selectedTask() *tasks.Task {
 	if m.completed.Focused() {
 		return m.completed.Selected()
 	}

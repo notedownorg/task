@@ -22,12 +22,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/notedownorg/notedown/pkg/ast"
-
 	"github.com/google/uuid"
-	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
-	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/fileserver/writer"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/tjarratt/babble"
 )
 
@@ -61,10 +59,10 @@ func GenerateWorkspace(root string, maxFiles int, maxTasks int) {
 
 }
 
-var statuses = []ast.Status{ast.Todo, ast.Doing, ast.Blocked, ast.Done, ast.Abandoned}
+var statuses = []tasks.Status{tasks.Todo, tasks.Doing, tasks.Blocked, tasks.Done, tasks.Abandoned}
 
 func genTask(client *tasks.Client, file string, index int) {
-	opts := []ast.TaskOption{ast.WithLine(writer.AT_END)}
+	opts := []tasks.TaskOption{tasks.WithLine(writer.AT_END)}
 
 	// Random status
 	status := statuses[rand.Intn(len(statuses))]
@@ -73,18 +71,18 @@ func genTask(client *tasks.Client, file string, index int) {
 	// Random due date -1 to +6 days or none at all (-2)
 	chance := rand.Intn(9) - 2
 	if chance > -2 {
-		opts = append(opts, ast.WithDue(time.Now().AddDate(0, 0, chance)))
+		opts = append(opts, tasks.WithDue(time.Now().AddDate(0, 0, chance)))
 	}
 
 	// Random priority 0 to 10 or none at all (-1)
 	chance = rand.Intn(11) - 1
 	if chance > -1 {
-		opts = append(opts, ast.WithPriority(chance))
+		opts = append(opts, tasks.WithPriority(chance))
 	}
 
-	// If completed we need to set the completed date to a random date in the last 3 days
-	if status == ast.Done {
-		opts = append(opts, ast.WithCompleted(time.Now().AddDate(0, 0, -rand.Intn(3))))
+	// If completed we need to set the completed date to a random date in the ltasks 3 days
+	if status == tasks.Done {
+		opts = append(opts, tasks.WithCompleted(time.Now().AddDate(0, 0, -rand.Intn(3))))
 	}
 
 	babbler := babble.NewBabbler()

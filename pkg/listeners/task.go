@@ -16,7 +16,7 @@ package listeners
 
 import (
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/context"
 )
 

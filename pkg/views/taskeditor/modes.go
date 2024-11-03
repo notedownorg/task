@@ -15,13 +15,13 @@
 package taskeditor
 
 import (
-	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 )
 
 type Mode func(*Model)
 
-func WithAdd(status ast.Status, text string) Mode {
+func WithAdd(status tasks.Status, text string) Mode {
 	return func(m *Model) {
 		m.mode = adding
 		m.status = NewStatus(m.ctx, status).Focus()
@@ -34,7 +34,7 @@ func WithAdd(status ast.Status, text string) Mode {
 	}
 }
 
-func WithEdit(task ast.Task) Mode {
+func WithEdit(task tasks.Task) Mode {
 	return func(m *Model) {
 		m.mode = editing
 		m.status = NewStatus(m.ctx, task.Status()).Focus()

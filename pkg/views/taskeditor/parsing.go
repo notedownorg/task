@@ -20,13 +20,12 @@ import (
 	"time"
 
 	"github.com/a-h/parse"
-	"github.com/notedownorg/notedown/pkg/ast"
-	"github.com/notedownorg/notedown/pkg/parsers"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 )
 
 func (m *Model) parseTask() {
 	// Build it into a task string and parse it
-	parser := parsers.Task("", "", time.Now())
+	parser := tasks.ParseTask("", "", time.Now())
 	in := parse.NewInput(fmt.Sprintf("- [%s] %s", m.status.Value(), m.text.Value()))
 	task, ok, _ := parser.Parse(in)
 
@@ -45,7 +44,7 @@ func (m *Model) parseTask() {
 	m.fields.Completed = m.computeCompleted(task)
 }
 
-func (m *Model) computeCompleted(task ast.Task) *time.Time {
+func (m *Model) computeCompleted(task tasks.Task) *time.Time {
 	completed := func(t time.Time) string {
 		return fmt.Sprintf(" completed:%s", t.Format("2006-01-02"))
 	}
@@ -54,7 +53,7 @@ func (m *Model) computeCompleted(task ast.Task) *time.Time {
 	// Ensure both text and status are both set to not completed.
 	if m.fields.Completed != nil {
 		// If all three are set then nothing has changed.
-		if strings.Contains(m.text.Value(), completed(*m.fields.Completed)[1:]) && m.status.Value() == ast.Done {
+		if strings.Contains(m.text.Value(), completed(*m.fields.Completed)[1:]) && m.status.Value() == tasks.Done {
 			return m.fields.Completed
 		}
 		if strings.Contains(m.text.Value(), completed(*m.fields.Completed)) {
@@ -62,7 +61,7 @@ func (m *Model) computeCompleted(task ast.Task) *time.Time {
 			m.text.SetValue(strings.ReplaceAll(m.text.Value(), completed(*m.fields.Completed), ""))
 			m.text.SetCursor(cursor)
 		}
-		m.status.SetValue(ast.Todo)
+		m.status.SetValue(tasks.Todo)
 		return nil
 	}
 
@@ -70,10 +69,10 @@ func (m *Model) computeCompleted(task ast.Task) *time.Time {
 	// Ensure both text and status are both set to completed.
 	if m.fields.Completed == nil {
 		// If all three are unset then nothing has changed.
-		if m.status.Value() != ast.Done && !strings.Contains(m.text.Value(), "completed:") {
+		if m.status.Value() != tasks.Done && !strings.Contains(m.text.Value(), "completed:") {
 			return nil
 		}
-		m.status.SetValue(ast.Done)
+		m.status.SetValue(tasks.Done)
 
 		// If the text does not contain the completed value, set it to the current time.
 		if !strings.Contains(m.text.Value(), "completed:") {
