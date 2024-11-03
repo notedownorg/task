@@ -18,13 +18,13 @@ import (
 	"log/slog"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/notedownorg/notedown/pkg/ast"
-	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
+	"github.com/notedownorg/notedown/pkg/fileserver/writer"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 )
 
 func (m *Model) submit() (tea.Model, tea.Cmd) {
 	// Create is intentionally run syncronously to prevent losing progress on error
-	if err := m.tasks.Create("README.md", m.text.Value(), m.status.Value(), ast.WithLine(writer.AT_END)); err != nil {
+	if err := m.tasks.Create("README.md", m.text.Value(), m.status.Value(), tasks.WithLine(writer.AT_END)); err != nil {
 		slog.Error("failed to create task", "error", err)
 
 		// TODO: We should probably show an error message to the user

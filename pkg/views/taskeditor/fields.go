@@ -21,7 +21,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
 )
@@ -35,7 +35,7 @@ type Fields struct {
 	Scheduled *time.Time
 	Completed *time.Time
 	Priority  *int
-	Every     *ast.Every
+	Every     *tasks.Every
 }
 
 func NewFields(ctx *context.ProgramContext) *Fields {

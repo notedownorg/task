@@ -15,8 +15,7 @@
 package agenda
 
 import (
-	"github.com/notedownorg/notedown/pkg/ast"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 )
 
@@ -27,7 +26,7 @@ func (m *Model) updateTasks() {
 	overdue := m.tasks.ListTasks(
 		tasks.FetchAllTasks(),
 		tasks.WithFilters(
-			tasks.FilterByStatus(ast.Todo, ast.Doing, ast.Blocked),
+			tasks.FilterByStatus(tasks.Todo, tasks.Doing, tasks.Blocked),
 			tasks.FilterByDueDate(nil, &next),
 		),
 		tasks.WithSorters(
@@ -36,38 +35,38 @@ func (m *Model) updateTasks() {
 		),
 	)
 
-	doing := groupedlist.Group[ast.Task]{Name: statusName[ast.Doing], Items: make([]ast.Task, 0)}
-	todo := groupedlist.Group[ast.Task]{Name: statusName[ast.Todo], Items: make([]ast.Task, 0)}
-	blocked := groupedlist.Group[ast.Task]{Name: statusName[ast.Blocked], Items: make([]ast.Task, 0)}
+	doing := groupedlist.Group[tasks.Task]{Name: statusName[tasks.Doing], Items: make([]tasks.Task, 0)}
+	todo := groupedlist.Group[tasks.Task]{Name: statusName[tasks.Todo], Items: make([]tasks.Task, 0)}
+	blocked := groupedlist.Group[tasks.Task]{Name: statusName[tasks.Blocked], Items: make([]tasks.Task, 0)}
 
 	for _, t := range overdue {
 		switch t.Status() {
-		case ast.Doing:
+		case tasks.Doing:
 			doing.Items = append(doing.Items, t)
-		case ast.Todo:
+		case tasks.Todo:
 			todo.Items = append(todo.Items, t)
-		case ast.Blocked:
+		case tasks.Blocked:
 			blocked.Items = append(blocked.Items, t)
 		}
 	}
 
-	m.tasklist.SetGroups([]groupedlist.Group[ast.Task]{doing, todo, blocked})
+	m.tasklist.SetGroups([]groupedlist.Group[tasks.Task]{doing, todo, blocked})
 
 	done := m.tasks.ListTasks(
 		tasks.FetchAllTasks(),
 		tasks.WithFilters(
-			tasks.FilterByStatus(ast.Done),
+			tasks.FilterByStatus(tasks.Done),
 			tasks.FilterByCompletedDate(&prev, &next),
 		),
-		tasks.WithSorters(tasks.SortByAlphabetical()),
+		tasks.WithSorters(), // empty defaults to alphabetical
 	)
-	m.completed.SetGroups([]groupedlist.Group[ast.Task]{{Name: "Completed", Items: done}})
+	m.completed.SetGroups([]groupedlist.Group[tasks.Task]{{Name: "Completed", Items: done}})
 }
 
-var statusName = map[ast.Status]string{
-	ast.Todo:      "Todo",
-	ast.Doing:     "Doing",
-	ast.Blocked:   "Blocked",
-	ast.Done:      "Done",
-	ast.Abandoned: "Abandoned",
+var statusName = map[tasks.Status]string{
+	tasks.Todo:      "Todo",
+	tasks.Doing:     "Doing",
+	tasks.Blocked:   "Blocked",
+	tasks.Done:      "Done",
+	tasks.Abandoned: "Abandoned",
 }

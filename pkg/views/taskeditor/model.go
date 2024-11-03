@@ -20,7 +20,7 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
 )
