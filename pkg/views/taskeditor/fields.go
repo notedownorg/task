@@ -36,6 +36,7 @@ type Fields struct {
 	Completed *time.Time
 	Priority  *int
 	Every     *tasks.Every
+	Name      string
 }
 
 func NewFields(ctx *context.ProgramContext) *Fields {

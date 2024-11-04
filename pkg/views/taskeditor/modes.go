@@ -15,6 +15,9 @@
 package taskeditor
 
 import (
+	"log/slog"
+	"time"
+
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 )
@@ -23,12 +26,19 @@ type Mode func(*Model)
 
 func WithAdd(status tasks.Status, text string) Mode {
 	return func(m *Model) {
+		// Ensure daily note to write eventual task to
+		d, _, err := m.daily.Ensure(time.Now(), time.Second*4)
+		if err != nil {
+			slog.Error("failed to ensure daily note", "error", err)
+		}
+
 		m.mode = adding
 		m.status = NewStatus(m.ctx, status).Focus()
 		m.text = NewText(m.ctx).SetValue(text)
 		m.footer = statusbar.New(m.ctx, statusbar.NewMode("add task", statusbar.ActionCreate), m.tasks)
 		m.fields = NewFields(m.ctx)
 		m.location = NewLocation(m.ctx)
+		m.location.SetLocation(d.Path(), -1) // At end
 		m.text.SetCursor(0)
 		m.parseTask()
 	}
@@ -37,6 +47,7 @@ func WithAdd(status tasks.Status, text string) Mode {
 func WithEdit(task tasks.Task) Mode {
 	return func(m *Model) {
 		m.mode = editing
+		m.original = &task
 		m.status = NewStatus(m.ctx, task.Status()).Focus()
 		m.text = NewText(m.ctx).SetValue(task.Body())
 		m.footer = statusbar.New(m.ctx, statusbar.NewMode("edit task", statusbar.ActionEdit), m.tasks)

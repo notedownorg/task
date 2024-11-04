@@ -58,6 +58,9 @@ func (l *Location) View() string {
 		file = "<select>"
 		line = "At End"
 	}
+	if l.line == -1 {
+		line = "At End"
+	}
 	return l.base.NewStyle().
 		Render(fmt.Sprintf("  %s 󰁕 %s", file, line))
 }

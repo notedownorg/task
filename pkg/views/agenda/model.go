@@ -21,6 +21,7 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/notedownorg/notedown/pkg/providers/daily"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/components/statusbar"
@@ -33,16 +34,17 @@ const (
 	view = "agenda"
 )
 
-func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
+func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client) *Model {
 	m := &Model{
 		ctx:   ctx,
 		tasks: t,
+		daily: d,
 
 		keyMap: DefaultKeyMap,
 		date:   time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC),
 
-		tasklist:  groupedlist.New[tasks.Task](groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme))).Focus(),
-		completed: groupedlist.New[tasks.Task](groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
+		tasklist:  groupedlist.New(groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme))).Focus(),
+		completed: groupedlist.New(groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
 		footer:    statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
 	}
 	m.updateTasks()
@@ -52,6 +54,7 @@ func New(ctx *context.ProgramContext, t *tasks.Client) *Model {
 type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
+	daily *daily.Client
 
 	keyMap KeyMap
 	date   time.Time
@@ -82,6 +85,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.ctx.Navigate(m, taskeditor.New(
 				m.ctx,
 				m.tasks,
+				m.daily,
 				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02"))),
 			))
 		case key.Matches(msg, m.keyMap.EditTask):
@@ -90,6 +94,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.ctx.Navigate(m, taskeditor.New(
 					m.ctx,
 					m.tasks,
+					m.daily,
 					taskeditor.WithEdit(*selected),
 				))
 			}
