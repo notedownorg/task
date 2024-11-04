@@ -80,7 +80,7 @@ func genTask(client *tasks.Client, file string, index int) {
 		opts = append(opts, tasks.WithPriority(chance))
 	}
 
-	// If completed we need to set the completed date to a random date in the ltasks 3 days
+	// If completed we need to set the completed date to a random date in the last 3 days
 	if status == tasks.Done {
 		opts = append(opts, tasks.WithCompleted(time.Now().AddDate(0, 0, -rand.Intn(3))))
 	}

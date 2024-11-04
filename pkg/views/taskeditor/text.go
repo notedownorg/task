@@ -34,7 +34,7 @@ type Text struct {
 func NewText(ctx *context.ProgramContext) *Text {
 	ti := textinput.New()
 	ti.Prompt = ""
-	ti.Placeholder = "Set status then start typing to populate task and fields"
+	ti.Placeholder = "Set status then tab to start typing to populate task and fields"
 	return &Text{
 		ctx: ctx,
 		ti:  ti,

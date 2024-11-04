@@ -37,6 +37,7 @@ func (m *Model) parseTask() {
 	m.text.IsValid = true
 
 	// If it parses, update the fields
+	m.fields.Name = task.Name()
 	m.fields.Due = task.Due()
 	m.fields.Scheduled = task.Scheduled()
 	m.fields.Priority = task.Priority()

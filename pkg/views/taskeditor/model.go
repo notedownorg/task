@@ -20,6 +20,7 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/notedownorg/notedown/pkg/providers/daily"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
@@ -35,7 +36,10 @@ const (
 type Model struct {
 	ctx   *context.ProgramContext
 	tasks *tasks.Client
-	mode  mode
+	daily *daily.Client
+
+	mode     mode
+	original *tasks.Task
 
 	keyMap KeyMap
 
@@ -47,10 +51,11 @@ type Model struct {
 	footer *statusbar.Model
 }
 
-func New(ctx *context.ProgramContext, t *tasks.Client, mode Mode) *Model {
+func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client, mode Mode) *Model {
 	m := &Model{
 		ctx:   ctx,
 		tasks: t,
+		daily: d,
 
 		keyMap: DefaultKeyMap,
 	}
