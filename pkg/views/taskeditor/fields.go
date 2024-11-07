@@ -83,7 +83,7 @@ func (f *Fields) View() string {
 		fields = append(fields, f.pillStyle(f.ctx.Theme.RedSoft).Render("󰀠 "+f.Scheduled.Format("2006-01-02")))
 	}
 	if f.Every != nil {
-		fields = append(fields, f.pillStyle(f.ctx.Theme.Magenta).Render("  "+f.Every.Text))
+		fields = append(fields, f.pillStyle(f.ctx.Theme.Magenta).Render("  "+f.Every.String()))
 	}
 	if f.Completed != nil {
 		fields = append(fields, f.pillStyle(f.ctx.Theme.BlueSoft).Render(" "+f.Completed.Format("2006-01-02")))

@@ -81,7 +81,7 @@ func root(cmd *cobra.Command, args []string) {
 
 	// Create the initial model and run the program
 	ctx := context.New(themes.CatpuccinMocha, context.WithListeners(taskListener))
-	agenda := agenda.New(ctx, tasksClient, dailyClient)
+	agenda := agenda.New(ctx, tasksClient, dailyClient, cfg.date)
 
 	p := tea.NewProgram(agenda, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
@@ -105,6 +105,7 @@ func init() {
 
 type config struct {
 	root string
+	date time.Time
 }
 
 func loadConfig() config {
@@ -114,6 +115,15 @@ func loadConfig() config {
 		fmt.Println("Please set NOTEDOWN_DIR environment variable to the root of your Notedown workspace")
 		os.Exit(1)
 	}
+
+	// Time should always be now, but for testing purposes we allow it to be set with a hidden env var
+	cfg.date = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC)
+	if t := os.Getenv("TEST_DATE"); t != "" {
+		if tt, err := time.Parse("2006-01-02", t); err == nil {
+			cfg.date = tt
+		}
+	}
+
 	return cfg
 }
 

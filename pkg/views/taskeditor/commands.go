@@ -43,8 +43,7 @@ func (m *Model) submit() (tea.Model, tea.Cmd) {
 
 	// Create/Update are intentionally run syncronously to prevent losing progress on error
 	if m.mode == adding {
-		opts = append(opts, tasks.WithLine(writer.AT_END))
-		if err := m.tasks.Create(m.location.file, m.text.Value(), m.status.Value(), opts...); err != nil {
+		if err := m.tasks.Create(m.location.file, writer.AT_END, m.fields.Name, m.status.Value(), opts...); err != nil {
 			slog.Error("failed to create task", "error", err)
 
 			// TODO: We should probably show an error message to the user

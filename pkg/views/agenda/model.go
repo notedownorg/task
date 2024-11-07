@@ -34,14 +34,15 @@ const (
 	view = "agenda"
 )
 
-func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client) *Model {
+func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client, date time.Time) *Model {
+	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	m := &Model{
 		ctx:   ctx,
 		tasks: t,
 		daily: d,
 
 		keyMap: DefaultKeyMap,
-		date:   time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC),
+		date:   date,
 
 		tasklist:  groupedlist.New(groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme))).Focus(),
 		completed: groupedlist.New(groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
@@ -86,7 +87,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ctx,
 				m.tasks,
 				m.daily,
-				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02"))),
+				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02")), m.date),
 			))
 		case key.Matches(msg, m.keyMap.EditTask):
 			selected := m.selectedTask()
@@ -95,7 +96,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.ctx,
 					m.tasks,
 					m.daily,
-					taskeditor.WithEdit(*selected),
+					taskeditor.WithEdit(*selected, m.date),
 				))
 			}
 		case key.Matches(msg, m.keyMap.DeleteTask):

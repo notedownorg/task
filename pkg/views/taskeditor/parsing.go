@@ -77,11 +77,11 @@ func (m *Model) computeCompleted(task tasks.Task) *time.Time {
 
 		// If the text does not contain the completed value, set it to the current time.
 		if !strings.Contains(m.text.Value(), "completed:") {
-			now := time.Now()
+			date := time.Date(m.date.Year(), m.date.Month(), m.date.Day(), 0, 0, 0, 0, time.UTC)
 			cursor := m.text.Cursor()
-			m.text.SetValue(m.text.Value() + completed(now))
+			m.text.SetValue(m.text.Value() + completed(date))
 			m.text.SetCursor(cursor)
-			return &now
+			return &date
 		}
 
 		// Otherwise just return the parsed value (the one set by the text).
