@@ -16,6 +16,7 @@ package taskeditor
 
 import (
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
@@ -40,6 +41,7 @@ type Model struct {
 
 	mode     mode
 	original *tasks.Task
+	date     time.Time
 
 	keyMap KeyMap
 

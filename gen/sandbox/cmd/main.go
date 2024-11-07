@@ -17,13 +17,20 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/spf13/pflag"
+)
+
+var (
+	fileCount = pflag.Int("files", 10, "number of files to generate")
+	taskCount = pflag.Int("tasks", 300, "number of tasks to generate")
 )
 
 func main() {
+	pflag.Parse()
 	tmp, _ := os.MkdirTemp("", "task-sandbox")
-	files, tasks := 10, 300
 
-	GenerateWorkspace(tmp, files, tasks)
+	GenerateWorkspace(tmp, *fileCount, *taskCount)
 
 	fmt.Println(tmp)
 }

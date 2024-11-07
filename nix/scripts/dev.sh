@@ -1,3 +1,5 @@
+#! /bin/sh
+
 # Copyright 2024 Notedown Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: hygiene verify tidy test dirty format licenser dev
-
-hygiene: tidy format licenser
-
-tidy:
-	nix develop --command go mod tidy
-
-test:
-	nix develop --command go test ./... -count=1
-
-dirty:
-	nix develop --command git diff --exit-code
-
-format:
-	nix develop --command gofmt -w .
-
-licenser:
-	nix develop --command licenser apply -r "Notedown Authors"
-
-dev:
-	nix develop --command nix/scripts/dev.sh
-
+NOTEDOWN_DIR=$(go generate ./gen/sandbox) go run main.go

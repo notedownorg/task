@@ -14,4 +14,4 @@
 
 package sandbox
 
-//go:generate go run ./cmd
+//go:generate go run ./cmd --files 10 --tasks 300

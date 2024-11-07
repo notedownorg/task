@@ -24,15 +24,16 @@ import (
 
 type Mode func(*Model)
 
-func WithAdd(status tasks.Status, text string) Mode {
+func WithAdd(status tasks.Status, text string, date time.Time) Mode {
 	return func(m *Model) {
 		// Ensure daily note to write eventual task to
-		d, _, err := m.daily.Ensure(time.Now(), time.Second*4)
+		d, _, err := m.daily.Ensure(time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC), time.Second*2)
 		if err != nil {
 			slog.Error("failed to ensure daily note", "error", err)
 		}
 
 		m.mode = adding
+		m.date = date
 		m.status = NewStatus(m.ctx, status).Focus()
 		m.text = NewText(m.ctx).SetValue(text)
 		m.footer = statusbar.New(m.ctx, statusbar.NewMode("add task", statusbar.ActionCreate), m.tasks)
@@ -44,9 +45,10 @@ func WithAdd(status tasks.Status, text string) Mode {
 	}
 }
 
-func WithEdit(task tasks.Task) Mode {
+func WithEdit(task tasks.Task, date time.Time) Mode {
 	return func(m *Model) {
 		m.mode = editing
+		m.date = date
 		m.original = &task
 		m.status = NewStatus(m.ctx, task.Status()).Focus()
 		m.text = NewText(m.ctx).SetValue(task.Body())
