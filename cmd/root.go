@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
@@ -45,15 +46,14 @@ func root(cmd *cobra.Command, args []string) {
 	cfg := loadConfig()
 
 	// Configure logging to a file
-	// logFileLocation := path.Join(cfg.root, "debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
-	logFileLocation := "task.log"
+	logFileLocation := path.Join(cfg.root, ".debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
 	logFile, err := os.OpenFile(logFileLocation, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("Error opening log file:", err)
 		os.Exit(1)
 	}
 	defer logFile.Close()
-	slog.SetDefault(slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug, AddSource: true})))
+	slog.SetDefault(slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true})))
 
 	// Configure workspace reader/writer
 	read, err := reader.NewClient(cfg.root, "task")
