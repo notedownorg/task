@@ -19,6 +19,7 @@ import (
 	"log/slog"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
@@ -35,11 +36,17 @@ import (
 	"github.com/notedownorg/task/pkg/views/agenda"
 )
 
+var (
+	Version    string
+	CommitHash string
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "task",
-	Short: "A task management CLI & TUI for your Notedown notes",
-	Run:   root,
+	Use:     "task",
+	Short:   "A task management CLI & TUI for your Notedown notes",
+	Run:     root,
+	Version: version(),
 }
 
 func root(cmd *cobra.Command, args []string) {
@@ -136,4 +143,21 @@ func initConfig() {
 	viper.SetEnvPrefix("notedown")
 	viper.BindEnv("dir")
 	viper.AutomaticEnv() // read in environment variables that match
+}
+
+func version() string {
+	var b strings.Builder
+
+	if Version == "" {
+		b.WriteString("dev")
+	} else {
+		b.WriteString(Version)
+	}
+
+	if CommitHash != "" {
+		b.WriteString("-")
+		b.WriteString(CommitHash)
+	}
+
+	return b.String()
 }
