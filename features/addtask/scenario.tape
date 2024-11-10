@@ -7,7 +7,7 @@ Output "features/addtask/demo.gif"
 Type "a"
 Space
 Tab
-Type "This is a basic task"
+Type "This is a basic task break me!"
 Sleep 1
 Enter
 Sleep 1
