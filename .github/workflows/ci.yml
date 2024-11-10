@@ -36,4 +36,15 @@ jobs:
 
     - run: make features
     - run: make dirty
+  
+      # If we failed re-run to generate the gifs so we debug
+    - run: make gifs
+      if: failure()
 
+    - name: Feature generation upload
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: testdata-${{ matrix.os }}
+        path: ${{ github.workspace }}/features/*
+        if-no-files-found: error

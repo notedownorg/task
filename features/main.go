@@ -44,7 +44,7 @@ func main() {
 			start := fmt.Sprintf("./%s/start", dir)
 			final := fmt.Sprintf("./%s/final", dir)
 			tape := fmt.Sprintf("./%s/scenario.tape", dir)
-			gif := fmt.Sprintf("./%s/scenario.gif", dir)
+			gif := fmt.Sprintf("./%s/demo.gif", dir)
 
 			// Setup the workspace by copying the start directory to a fresh final directory
 			slog.Info("setting up workspace", "start", start, "final", final)
