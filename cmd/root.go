@@ -47,10 +47,10 @@ func root(cmd *cobra.Command, args []string) {
 
 	// Configure logging to a file
 	logFileLocation := path.Join(cfg.root, ".debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
-    if err := os.MkdirAll(path.Dir(logFileLocation), 0755); err != nil {
-        fmt.Println("error creating log directory:", err)
-        os.Exit(1)
-    }
+	if err := os.MkdirAll(path.Dir(logFileLocation), 0755); err != nil {
+		fmt.Println("error creating log directory:", err)
+		os.Exit(1)
+	}
 	logFile, err := os.OpenFile(logFileLocation, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("error opening log file:", err)
