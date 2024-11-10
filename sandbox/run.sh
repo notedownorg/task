@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-NOTEDOWN_DIR=$(go generate ./gen/sandbox) go run main.go
+NOTEDOWN_DIR=$(go run ./sandbox/*.go) go run main.go

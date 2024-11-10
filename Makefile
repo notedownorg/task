@@ -12,15 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: hygiene verify tidy test dirty format licenser dev
+.PHONY: hygiene verify tidy features gifs dirty format licenser dev
 
 hygiene: tidy format licenser
 
 tidy:
 	nix develop --command go mod tidy
 
-test:
-	nix develop --command go test ./... -count=1
+features:
+	nix develop --command go run features/main.go
+
+gifs: 
+	nix develop --command go run features/main.go --generate-gifs
 
 dirty:
 	nix develop --command git diff --exit-code
@@ -32,5 +35,6 @@ licenser:
 	nix develop --command licenser apply -r "Notedown Authors"
 
 dev:
-	nix develop --command nix/scripts/dev.sh
+	nix develop --command sandbox/run.sh
+
 

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
@@ -45,11 +46,14 @@ func root(cmd *cobra.Command, args []string) {
 	cfg := loadConfig()
 
 	// Configure logging to a file
-	// logFileLocation := path.Join(cfg.root, "debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
-	logFileLocation := "task.log"
+	logFileLocation := path.Join(cfg.root, ".debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
+	if err := os.MkdirAll(path.Dir(logFileLocation), 0755); err != nil {
+		fmt.Println("error creating log directory:", err)
+		os.Exit(1)
+	}
 	logFile, err := os.OpenFile(logFileLocation, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Println("Error opening log file:", err)
+		fmt.Println("error opening log file:", err)
 		os.Exit(1)
 	}
 	defer logFile.Close()
@@ -85,7 +89,7 @@ func root(cmd *cobra.Command, args []string) {
 
 	p := tea.NewProgram(agenda, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
-		fmt.Println("Error running program:", err)
+		fmt.Println("error running program:", err)
 		os.Exit(1)
 	}
 }

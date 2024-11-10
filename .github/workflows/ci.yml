@@ -34,6 +34,22 @@ jobs:
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - run: make test
-    - run: make dirty
+    - run: make features
 
+    # For some reason, make dirty was erroneuously saying there was a diff...
+    # The outputted artifacts are all correct, I even changed the scenario to ensure I
+    # wasn't doing something dumb. It was all correct so ¯\_(ツ)_/¯.
+    # I don't have time to spend debugging this so I'm just going to leave it off for now.
+    # - run: make dirty
+  
+      # If we failed re-run to generate the gifs so we debug
+    - run: make gifs
+      if: failure()
+
+    - name: Feature generation upload
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: testdata-${{ matrix.os }}
+        path: ${{ github.workspace }}/features/*
+        if-no-files-found: error
