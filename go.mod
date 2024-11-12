@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.13.1
 	github.com/google/uuid v1.6.0
 	github.com/mattn/go-runewidth v0.0.16
-	github.com/notedownorg/notedown v0.0.0-20241112105625-d13163ccb65f
+	github.com/notedownorg/notedown v0.0.0-20241112202015-b72d0795dfff
 	github.com/otiai10/copy v1.14.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
