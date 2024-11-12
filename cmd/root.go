@@ -53,7 +53,7 @@ func root(cmd *cobra.Command, args []string) {
 	cfg := loadConfig()
 
 	// Configure logging to a file
-	logFileLocation := path.Join(cfg.root, ".debug", fmt.Sprintf("task.%v.log", time.Now().Unix()))
+	logFileLocation := path.Join(cfg.home, ".notedown", "logs", "task.log")
 	if err := os.MkdirAll(path.Dir(logFileLocation), 0755); err != nil {
 		fmt.Println("error creating log directory:", err)
 		os.Exit(1)
@@ -115,6 +115,7 @@ func init() {
 }
 
 type config struct {
+	home string
 	root string
 	date time.Time
 }
@@ -134,6 +135,13 @@ func loadConfig() config {
 			cfg.date = tt
 		}
 	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Println("error getting user home directory:", err)
+		os.Exit(1)
+	}
+	cfg.home = home
 
 	return cfg
 }

@@ -37,6 +37,9 @@ licenser:
 dev:
 	nix develop --command sandbox/run.sh
 
+run:
+	nix develop --command go run main.go
+
 install:
 	nix develop --command go install -ldflags "-X 'github.com/notedownorg/task/cmd.CommitHash=$(shell git rev-parse HEAD)'"
 
