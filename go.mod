@@ -17,8 +17,6 @@ require (
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 )
 
-replace github.com/notedownorg/notedown => ../../notedown/completion-debug
-
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
