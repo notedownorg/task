@@ -9,13 +9,15 @@ require (
 	github.com/charmbracelet/lipgloss v0.13.1
 	github.com/google/uuid v1.6.0
 	github.com/mattn/go-runewidth v0.0.16
-	github.com/notedownorg/notedown v0.0.0-20241112202015-b72d0795dfff
+	github.com/notedownorg/notedown v0.0.0-20241113120059-1783e3825d53
 	github.com/otiai10/copy v1.14.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 )
+
+replace github.com/notedownorg/notedown => ../../notedown/completion-debug
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect

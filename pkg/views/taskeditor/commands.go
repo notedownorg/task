@@ -56,9 +56,10 @@ func (m *Model) submit() (tea.Model, tea.Cmd) {
 
 	// Ensure name/status are also updated
 	opts = append(opts, tasks.WithName(m.fields.Name))
-	opts = append(opts, tasks.WithStatus(m.status.Value()))
+	opts = append(opts, tasks.WithStatus(m.status.Value(), m.date))
 
 	task := tasks.NewTaskFromTask(*m.original, opts...)
+	slog.Debug("submitting edited task", "identifier", task.Identifier().String(), "task", task.String())
 	if err := m.tasks.Update(task); err != nil {
 		slog.Error("failed to update task", "error", err)
 
