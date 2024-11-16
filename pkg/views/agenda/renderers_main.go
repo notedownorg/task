@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mattn/go-runewidth"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/themes"
@@ -99,5 +100,74 @@ func mainRendererFuncs(theme themes.Theme, dateRetriever func() time.Time) group
 
 			return s().Width(width).Padding(0, paddingHorizontal).Background(bg).Foreground(fg).Render(left + middle + right)
 		},
+	}
+}
+
+// See https://github.com/charmbracelet/lipgloss/issues/144 for why we need to pass bg
+func buildRight(selected bool) func(theme themes.Theme, task tasks.Task, dateRetriever func() time.Time, bg lipgloss.Color) string {
+	return func(theme themes.Theme, task tasks.Task, dateRetriever func() time.Time, bg lipgloss.Color) string {
+		res := make([]string, 0)
+
+		// Prefer due date over scheduled date as it is definitially more important
+		if task.Due() != nil {
+			due, date := *task.Due(), dateRetriever().Truncate(time.Hour*24)
+			due = due.Truncate(time.Hour * 24)
+			dr := ""
+			if dateBefore(due, date) {
+				if (date.Sub(due) / (24 * time.Hour)) == 1 {
+					dr = "󰃭 Yesterday"
+				} else {
+					dr = "󰃭 " + task.Due().Format("Jan  _2"+dayOfMonthSuffix(due.Day()))
+				}
+			}
+			if selected {
+				res = append(res, s().Background(bg).Foreground(theme.TextCursor).Render(dr))
+			} else {
+				res = append(res, s().Background(bg).Foreground(theme.Red).Render(dr))
+			}
+		} else if task.Scheduled() != nil {
+			scheduled, date := *task.Scheduled(), dateRetriever().Truncate(time.Hour*24)
+			scheduled = scheduled.Truncate(time.Hour * 24)
+			sr := ""
+			if dateBefore(scheduled, date) {
+				if (date.Sub(scheduled) / (24 * time.Hour)) == 1 {
+					sr = "󰃭 Yesterday"
+				} else {
+					sr = "󰃭 " + task.Scheduled().Format("Jan  _2"+dayOfMonthSuffix(scheduled.Day()))
+				}
+			}
+			if selected {
+				res = append(res, s().Background(bg).Foreground(theme.TextCursor).Render(sr))
+			} else {
+				res = append(res, s().Background(bg).Foreground(theme.Text).Render(sr))
+			}
+		}
+
+		return strings.Join(res, "  ")
+	}
+}
+
+// See https://github.com/charmbracelet/lipgloss/issues/144 for why we need to pass bg
+func buildLeft(selected bool) func(theme themes.Theme, task tasks.Task, remainingSpace int, bg lipgloss.Color) string {
+	return func(theme themes.Theme, task tasks.Task, remainingSpace int, bg lipgloss.Color) string {
+		res := make([]string, 0)
+
+		i := icon(task.Status())
+		res = append(res, i, "  ")
+
+		e := every(task)
+
+		textWidth := remainingSpace - w(i) - w(e)
+		text := runewidth.Truncate(task.Name(), textWidth, "…")
+		res = append(res, text)
+
+		if e != "" {
+			if selected {
+				res = append(res, " ", s().Background(bg).Foreground(theme.TextCursor).Render(e))
+			} else {
+				res = append(res, " ", s().Background(bg).Foreground(theme.Text).Render(e))
+			}
+		}
+		return strings.Join(res, "")
 	}
 }

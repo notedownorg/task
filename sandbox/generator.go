@@ -68,6 +68,7 @@ func genTask(client *tasks.Client, file string) {
 	status := statuses[rand.Intn(len(statuses))]
 
 	// Randomly add other fields
+
 	// Due dates
 	switch rand.Intn(4) {
 	// no due date for 0
@@ -77,6 +78,17 @@ func genTask(client *tasks.Client, file string) {
 		opts = append(opts, tasks.WithDue(time.Now().AddDate(0, 0, rand.Intn(15))))
 	case 3: // due date today
 		opts = append(opts, tasks.WithDue(time.Now()))
+	}
+
+	// Scheduled dates
+	switch rand.Intn(4) {
+	// no scheduled date for 0
+	case 1: // scheduled date in past
+		opts = append(opts, tasks.WithScheduled(time.Now().AddDate(0, 0, -rand.Intn(15))))
+	case 2: // scheduled date in future
+		opts = append(opts, tasks.WithScheduled(time.Now().AddDate(0, 0, rand.Intn(15))))
+	case 3: // scheduled date today
+		opts = append(opts, tasks.WithScheduled(time.Now()))
 	}
 
 	// Random priority 0 to 10 or none at all (<0)

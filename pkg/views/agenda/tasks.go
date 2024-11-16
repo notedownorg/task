@@ -25,9 +25,14 @@ func (m *Model) updateTasks() {
 
 	overdue := m.tasks.ListTasks(
 		tasks.FetchAllTasks(),
-		tasks.WithFilters(
-			tasks.FilterByStatus(tasks.Todo, tasks.Doing, tasks.Blocked),
-			tasks.FilterByDueDate(nil, &next),
+		tasks.WithFilter(
+			tasks.And(
+				tasks.FilterByStatus(tasks.Todo, tasks.Doing, tasks.Blocked),
+				tasks.Or(
+					tasks.FilterByDueDate(nil, &next),
+					tasks.FilterByScheduledDate(nil, &next),
+				),
+			),
 		),
 		tasks.WithSorters(
 			tasks.SortByStatus(tasks.AgendaOrder()),
@@ -54,9 +59,11 @@ func (m *Model) updateTasks() {
 
 	done := m.tasks.ListTasks(
 		tasks.FetchAllTasks(),
-		tasks.WithFilters(
-			tasks.FilterByStatus(tasks.Done),
-			tasks.FilterByCompletedDate(&prev, &next),
+		tasks.WithFilter(
+			tasks.And(
+				tasks.FilterByStatus(tasks.Done),
+				tasks.FilterByCompletedDate(&prev, &next),
+			),
 		),
 		tasks.WithSorters(), // empty defaults to alphabetical
 	)
