@@ -68,16 +68,32 @@ func genTask(client *tasks.Client, file string) {
 	status := statuses[rand.Intn(len(statuses))]
 
 	// Randomly add other fields
-	// Random due date -1 to +6 days or none at all (-2)
-	chance := rand.Intn(9) - 2
-	if chance > -2 {
-		opts = append(opts, tasks.WithDue(time.Now().AddDate(0, 0, chance)))
+	// Due dates
+	switch rand.Intn(4) {
+	// no due date for 0
+	case 1: // due date in past
+		opts = append(opts, tasks.WithDue(time.Now().AddDate(0, 0, -rand.Intn(15))))
+	case 2: // due date in future
+		opts = append(opts, tasks.WithDue(time.Now().AddDate(0, 0, rand.Intn(15))))
+	case 3: // due date today
+		opts = append(opts, tasks.WithDue(time.Now()))
 	}
 
-	// Random priority 0 to 10 or none at all (-1)
-	chance = rand.Intn(11) - 1
-	if chance > -1 {
+	// Random priority 0 to 10 or none at all (<0)
+	chance := rand.Intn(16) - 6
+	if chance > 0 {
 		opts = append(opts, tasks.WithPriority(chance))
+	}
+
+	// Randomly add everys
+	switch rand.Intn(5) - 3 {
+	case 0:
+		e, _ := tasks.NewEvery("day")
+		opts = append(opts, tasks.WithEvery(e))
+	case 1:
+		e, _ := tasks.NewEvery("week")
+		opts = append(opts, tasks.WithEvery(e))
+
 	}
 
 	// If completed we need to set the completed date to a random date in the last 3 days
