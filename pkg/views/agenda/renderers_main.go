@@ -139,7 +139,7 @@ func buildRight(selected bool) func(theme themes.Theme, task tasks.Task, dateRet
 			if selected {
 				res = append(res, s().Background(bg).Foreground(theme.TextCursor).Render(sr))
 			} else {
-				res = append(res, s().Background(bg).Foreground(theme.Text).Render(sr))
+				res = append(res, s().Background(bg).Foreground(theme.TextFaint).Render(sr))
 			}
 		}
 
