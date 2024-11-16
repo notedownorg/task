@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     utils = { url = "github:numtide/flake-utils"; };
-    licenser = { url = "github:liamawhite/licenser/62520dbef14ff6e9aa864e0dbc19da9e3bed61c0"; };
+    licenser = { url = "github:liamawhite/licenser/3ee5a0592eedd79958227562508a62ff7e82016f"; };
   };
   outputs = { self, nixpkgs, utils, licenser }:
     utils.lib.eachDefaultSystem
