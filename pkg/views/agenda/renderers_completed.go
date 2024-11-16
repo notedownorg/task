@@ -17,7 +17,6 @@ package agenda
 import (
 	"log/slog"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mattn/go-runewidth"
@@ -79,55 +78,5 @@ func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[tasks.Task
 			slog.Warn("unexpected task status", "status", task.Status())
 			return ""
 		},
-	}
-}
-
-// See https://github.com/charmbracelet/lipgloss/issues/144 for why we need to pass bg
-func buildRight(selected bool) func(theme themes.Theme, task tasks.Task, dateRetriever func() time.Time, bg lipgloss.Color) string {
-	return func(theme themes.Theme, task tasks.Task, dateRetriever func() time.Time, bg lipgloss.Color) string {
-		res := make([]string, 0)
-
-		due, date := *task.Due(), dateRetriever().Truncate(time.Hour*24)
-		due = due.Truncate(time.Hour * 24)
-		dr := ""
-		if task.Due() != nil && dateBefore(due, date) {
-			if (date.Sub(due) / (24 * time.Hour)) == 1 {
-				dr = "󰃭 Yesterday"
-			} else {
-				dr = "󰃭 " + task.Due().Format("Jan  _2"+dayOfMonthSuffix(due.Day()))
-			}
-		}
-		if selected {
-			res = append(res, s().Background(bg).Foreground(theme.TextCursor).Render(dr))
-		} else {
-			res = append(res, s().Background(bg).Foreground(theme.Red).Render(dr))
-		}
-
-		return strings.Join(res, "  ")
-	}
-}
-
-// See https://github.com/charmbracelet/lipgloss/issues/144 for why we need to pass bg
-func buildLeft(selected bool) func(theme themes.Theme, task tasks.Task, remainingSpace int, bg lipgloss.Color) string {
-	return func(theme themes.Theme, task tasks.Task, remainingSpace int, bg lipgloss.Color) string {
-		res := make([]string, 0)
-
-		i := icon(task.Status())
-		res = append(res, i, "  ")
-
-		e := every(task)
-
-		textWidth := remainingSpace - w(i) - w(e)
-		text := runewidth.Truncate(task.Name(), textWidth, "…")
-		res = append(res, text)
-
-		if e != "" {
-			if selected {
-				res = append(res, " ", s().Background(bg).Foreground(theme.TextCursor).Render(e))
-			} else {
-				res = append(res, " ", s().Background(bg).Foreground(theme.Text).Render(e))
-			}
-		}
-		return strings.Join(res, "")
 	}
 }
