@@ -10,14 +10,15 @@
         let
           pkgs = import nixpkgs { inherit system; };
         in
+        with pkgs;
         {
           devShells.default = pkgs.mkShell {
             buildInputs = [
-              pkgs.git
-              pkgs.go
-              pkgs.ffmpeg
-              pkgs.ttyd
-              pkgs.vhs
+              git
+              go
+              ffmpeg
+              ttyd
+              vhs
               licenser.packages.${system}.default
             ];
           };
