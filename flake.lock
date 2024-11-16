@@ -6,17 +6,17 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1731783634,
-        "narHash": "sha256-8qdkP8mUI/7wpVSmBEMzBVh5Qx/kw8e3uqfM9lvRmpI=",
+        "lastModified": 1731785080,
+        "narHash": "sha256-3x8zY+zsva6AbP0bfNXnR3ldTdaMPp51IyQG7DiNZGA=",
         "owner": "liamawhite",
         "repo": "licenser",
-        "rev": "62520dbef14ff6e9aa864e0dbc19da9e3bed61c0",
+        "rev": "3ee5a0592eedd79958227562508a62ff7e82016f",
         "type": "github"
       },
       "original": {
         "owner": "liamawhite",
         "repo": "licenser",
-        "rev": "62520dbef14ff6e9aa864e0dbc19da9e3bed61c0",
+        "rev": "3ee5a0592eedd79958227562508a62ff7e82016f",
         "type": "github"
       }
     },
