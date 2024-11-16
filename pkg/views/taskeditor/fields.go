@@ -20,8 +20,8 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
+	"github.com/notedownorg/task/pkg/components/pill"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
 )
@@ -57,36 +57,27 @@ func (f Fields) unset() bool {
 	return f.Due == nil && f.Scheduled == nil && f.Completed == nil && f.Priority == nil && f.Every == nil
 }
 
-func (f Fields) pillStyle(color lipgloss.Color) lipgloss.Style {
-	return lipgloss.NewStyle().
-		Background(color).
-		Foreground(f.ctx.Theme.TextCursor).
-		Padding(0, 1)
-}
-
 func (f *Fields) View() string {
+	theme := f.ctx.Theme
 	if f.unset() {
-		return lipgloss.NewStyle().
-			Padding(0, 1).
-			Background(f.ctx.Theme.Panel).
-			Render("no fields set")
+		return pill.New(theme.Panel, theme.Text).Render("no fields set")
 	}
 
 	var fields []string
 	if f.Due != nil {
-		fields = append(fields, f.pillStyle(f.ctx.Theme.Green).Render("󰃭 "+f.Due.Format("2006-01-02")))
+		fields = append(fields, pill.New(theme.Green, theme.TextCursor).Render("󰃭 "+f.Due.Format("2006-01-02")))
 	}
 	if f.Priority != nil {
-		fields = append(fields, f.pillStyle(f.ctx.Theme.Yellow).Render("  "+fmt.Sprintf("%d", *f.Priority)))
+		fields = append(fields, pill.New(theme.Yellow, theme.TextCursor).Render("  "+fmt.Sprintf("%d", *f.Priority)))
 	}
 	if f.Scheduled != nil {
-		fields = append(fields, f.pillStyle(f.ctx.Theme.RedSoft).Render("󰀠 "+f.Scheduled.Format("2006-01-02")))
+		fields = append(fields, pill.New(theme.RedSoft, theme.TextCursor).Render("󰀠 "+f.Scheduled.Format("2006-01-02")))
 	}
 	if f.Every != nil {
-		fields = append(fields, f.pillStyle(f.ctx.Theme.Magenta).Render("  "+f.Every.String()))
+		fields = append(fields, pill.New(theme.Magenta, theme.TextCursor).Render("󰕇  "+f.Every.String()))
 	}
 	if f.Completed != nil {
-		fields = append(fields, f.pillStyle(f.ctx.Theme.BlueSoft).Render(" "+f.Completed.Format("2006-01-02")))
+		fields = append(fields, pill.New(theme.BlueSoft, theme.TextCursor).Render(" "+f.Completed.Format("2006-01-02")))
 	}
 
 	return f.base.NewStyle().

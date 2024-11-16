@@ -44,10 +44,10 @@ func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client, date tim
 		keyMap: DefaultKeyMap,
 		date:   date,
 
-		tasklist:  groupedlist.New(groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme))).Focus(),
 		completed: groupedlist.New(groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
 		footer:    statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
 	}
+	m.tasklist = groupedlist.New(groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme, func() time.Time { return m.date }))).Focus()
 	m.updateTasks()
 	return m
 }
