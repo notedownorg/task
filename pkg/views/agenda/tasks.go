@@ -23,7 +23,7 @@ func (m *Model) updateTasks() {
 	prev := m.date.Add(-1)
 	next := m.date.AddDate(0, 0, 1).Add(-1)
 
-	overdue := m.tasks.ListTasks(
+	overdue := m.nd.ListTasks(
 		tasks.FetchAllTasks(),
 		tasks.WithFilter(
 			tasks.And(
@@ -57,7 +57,7 @@ func (m *Model) updateTasks() {
 
 	m.tasklist.SetGroups([]groupedlist.Group[tasks.Task]{doing, todo, blocked})
 
-	done := m.tasks.ListTasks(
+	done := m.nd.ListTasks(
 		tasks.FetchAllTasks(),
 		tasks.WithFilter(
 			tasks.And(

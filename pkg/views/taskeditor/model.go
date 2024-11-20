@@ -21,10 +21,10 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/providers/daily"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
+	"github.com/notedownorg/task/pkg/notedown"
 )
 
 type mode int
@@ -35,9 +35,8 @@ const (
 )
 
 type Model struct {
-	ctx   *context.ProgramContext
-	tasks *tasks.Client
-	daily *daily.Client
+	ctx *context.ProgramContext
+	nd  notedown.Client
 
 	mode     mode
 	original *tasks.Task
@@ -53,11 +52,10 @@ type Model struct {
 	footer *statusbar.Model
 }
 
-func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client, mode Mode) *Model {
+func New(ctx *context.ProgramContext, nd notedown.Client, mode Mode) *Model {
 	m := &Model{
-		ctx:   ctx,
-		tasks: t,
-		daily: d,
+		ctx: ctx,
+		nd:  nd,
 
 		keyMap: DefaultKeyMap,
 	}

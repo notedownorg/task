@@ -21,12 +21,12 @@ import (
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/providers/daily"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/listeners"
+	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/notedownorg/task/pkg/views/taskeditor"
 )
 
@@ -34,18 +34,17 @@ const (
 	view = "agenda"
 )
 
-func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client, date time.Time) *Model {
+func New(ctx *context.ProgramContext, nd notedown.Client, date time.Time) *Model {
 	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	m := &Model{
-		ctx:   ctx,
-		tasks: t,
-		daily: d,
+		ctx: ctx,
+		nd:  nd,
 
 		keyMap: DefaultKeyMap,
 		date:   date,
 
 		completed: groupedlist.New(groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
-		footer:    statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), t),
+		footer:    statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), nd),
 	}
 	m.tasklist = groupedlist.New(groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme, func() time.Time { return m.date }))).Focus()
 	m.updateTasks()
@@ -53,9 +52,8 @@ func New(ctx *context.ProgramContext, t *tasks.Client, d *daily.Client, date tim
 }
 
 type Model struct {
-	ctx   *context.ProgramContext
-	tasks *tasks.Client
-	daily *daily.Client
+	ctx *context.ProgramContext
+	nd  notedown.Client
 
 	keyMap KeyMap
 	date   time.Time
@@ -85,8 +83,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.AddTask):
 			return m.ctx.Navigate(m, taskeditor.New(
 				m.ctx,
-				m.tasks,
-				m.daily,
+				m.nd,
 				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02")), m.date),
 			))
 		case key.Matches(msg, m.keyMap.EditTask):
@@ -94,15 +91,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if selected != nil {
 				return m.ctx.Navigate(m, taskeditor.New(
 					m.ctx,
-					m.tasks,
-					m.daily,
+					m.nd,
 					taskeditor.WithEdit(*selected, m.date),
 				))
 			}
 		case key.Matches(msg, m.keyMap.DeleteTask):
 			selected := m.selectedTask()
 			if selected != nil {
-				if err := m.tasks.Delete(*selected); err != nil {
+				if err := m.nd.DeleteTask(*selected); err != nil {
 					m.footer.SetMessage(fmt.Sprintf("error deleting task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
 				}
 			}
