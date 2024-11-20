@@ -21,9 +21,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
+	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
@@ -64,8 +64,8 @@ func statsStyle(theme themes.Theme) lipgloss.Style {
 type Model struct {
 	base model.Base
 
-	ctx   *context.ProgramContext
-	tasks *tasks.Client
+	ctx *context.ProgramContext
+	nd  notedown.Client
 
 	message       string
 	messageExpire time.Time
@@ -74,11 +74,11 @@ type Model struct {
 	mode Mode
 }
 
-func New(ctx *context.ProgramContext, mode Mode, t *tasks.Client) *Model {
+func New(ctx *context.ProgramContext, mode Mode, nd notedown.Client) *Model {
 	return &Model{
-		ctx:   ctx,
-		mode:  mode,
-		tasks: t,
+		ctx:  ctx,
+		mode: mode,
+		nd:   nd,
 	}
 }
 
@@ -114,7 +114,7 @@ func (m *Model) View() string {
 		m.message = ""
 	}
 
-	t := m.tasks.Summary()
+	t := m.nd.TaskSummary()
 	stats := fmt.Sprintf("󰄬 %d", t)
 
 	statsBlock := statsStyle(m.ctx.Theme).Render(stats)

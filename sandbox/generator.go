@@ -61,7 +61,7 @@ func GenerateWorkspace(root string, maxFiles int, maxTasks int) {
 
 var statuses = []tasks.Status{tasks.Todo, tasks.Doing, tasks.Blocked, tasks.Done, tasks.Abandoned}
 
-func genTask(client *tasks.Client, file string) {
+func genTask(client *tasks.TaskClient, file string) {
 	opts := []tasks.TaskOption{}
 
 	// Random status
@@ -116,7 +116,7 @@ func genTask(client *tasks.Client, file string) {
 	babbler := babble.NewBabbler()
 	babbler.Count = rand.Intn(6) + 1
 	babbler.Separator = " "
-	if err := client.Create(file, writer.AT_END, fmt.Sprintf("%v", babbler.Babble()), status, opts...); err != nil {
+	if err := client.CreateTask(file, writer.AT_END, fmt.Sprintf("%v", babbler.Babble()), status, opts...); err != nil {
 		slog.Error("failed to create task", "file", file, "error", err)
 	}
 

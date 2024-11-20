@@ -23,15 +23,13 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-	"github.com/notedownorg/notedown/pkg/fileserver/writer"
-	"github.com/notedownorg/notedown/pkg/providers/daily"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/listeners"
+	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/notedownorg/task/pkg/themes"
 	"github.com/notedownorg/task/pkg/views/agenda"
 )
@@ -66,33 +64,21 @@ func root(cmd *cobra.Command, args []string) {
 	defer logFile.Close()
 	slog.SetDefault(slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug, AddSource: true})))
 
-	// Configure workspace reader/writer
-	read, err := reader.NewClient(cfg.root, "task")
+	client, err := notedown.NewClient(cfg.root)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error creating client:", err)
 		os.Exit(1)
 	}
-	write := writer.NewClient(cfg.root)
-
-	// Configure the task client
-	taskReaderChannel := make(chan reader.Event)
-	read.Subscribe(taskReaderChannel, reader.WithInitialDocuments())
-	tasksClient := tasks.NewClient(write, taskReaderChannel, tasks.WithInitialLoadWaiter(100*time.Millisecond))
-
-	// Configure the daily note client
-	dailyReaderChannel := make(chan reader.Event)
-	read.Subscribe(dailyReaderChannel, reader.WithInitialDocuments())
-	dailyClient := daily.NewClient(write, dailyReaderChannel, daily.WithInitialLoadWaiter(100*time.Millisecond))
 
 	// Create a listener for the task client to refresh the TUI when tasks are created/updated/deleted
 	// We don't need one for the daily note client because we don't need to re-render the TUI when daily notes are created/updated/deleted
 	taskSub := make(chan tasks.Event)
-	tasksClient.Subscribe(taskSub)
+	client.Subscribe(taskSub)
 	taskListener := listeners.NewTaskListener(taskSub)
 
 	// Create the initial model and run the program
 	ctx := context.New(themes.CatpuccinMocha, context.WithListeners(taskListener))
-	agenda := agenda.New(ctx, tasksClient, dailyClient, cfg.date)
+	agenda := agenda.New(ctx, client, cfg.date)
 
 	p := tea.NewProgram(agenda, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
