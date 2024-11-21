@@ -22,50 +22,53 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
+	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
+	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/tjarratt/babble"
 )
 
 func GenerateWorkspace(root string, maxFiles int, maxTasks int) {
-	// Create the files before client so we don't have to worry about loading
-	files := make([]string, maxFiles)
-	for i := 0; i < maxFiles; i++ {
-		name := uuid.New().String()
+	// Create the non-project files before client so we don't have to worry about loading
+	files := make([]string, 0, maxFiles)
+	babbler := babble.NewBabbler()
+	babbler.Count = 2
+
+	for i := 0; i < maxFiles/3; i++ { // 1/3 of the files are empty files
+		name := babbler.Babble()
 		rel := fmt.Sprintf("%s.md", name)
-		files[i] = rel
+		files = append(files, rel)
 		if err := os.WriteFile(filepath.Join(root, rel), []byte(fmt.Sprintf("# %s\n", name)), 0644); err != nil {
 			slog.Error("failed to create file", "file", rel, "error", err)
 		}
 	}
 
 	// Configure the tasks client
-	read, err := reader.NewClient(root, "task-sandbox-generator")
+	nd, err := notedown.NewClient(root)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		slog.Error("failed to create notedown client", "error", err)
 	}
-	write := writer.NewClient(root)
-	readSub := make(chan reader.Event)
-	read.Subscribe(readSub, reader.WithInitialDocuments())
-	tasksClient := tasks.NewClient(write, readSub)
+
+	// Generate projects
+	for i := 0; i < (maxFiles/3)*2; i++ { // 2/3rds of the files are projects
+		files = append(files, genProject(nd))
+	}
 
 	// Create the tasks
 	for i := 0; i < maxTasks; i++ {
-		genTask(tasksClient, files[rand.Intn(len(files))])
+		genTask(nd, files[rand.Intn(len(files))])
 	}
 
 }
 
-var statuses = []tasks.Status{tasks.Todo, tasks.Doing, tasks.Blocked, tasks.Done, tasks.Abandoned}
+var taskStatuses = []tasks.Status{tasks.Todo, tasks.Doing, tasks.Blocked, tasks.Done, tasks.Abandoned}
 
-func genTask(client *tasks.TaskClient, file string) {
+func genTask(client notedown.Client, file string) {
 	opts := []tasks.TaskOption{}
 
 	// Random status
-	status := statuses[rand.Intn(len(statuses))]
+	status := taskStatuses[rand.Intn(len(taskStatuses))]
 
 	// Randomly add other fields
 
@@ -119,5 +122,20 @@ func genTask(client *tasks.TaskClient, file string) {
 	if err := client.CreateTask(file, writer.AT_END, fmt.Sprintf("%v", babbler.Babble()), status, opts...); err != nil {
 		slog.Error("failed to create task", "file", file, "error", err)
 	}
+}
 
+var projectStatuses = []projects.Status{projects.Active, projects.Archived, projects.Abandoned, projects.Blocked, projects.Backlog}
+
+func genProject(client notedown.Client) string {
+	babbler := babble.NewBabbler()
+	babbler.Count = 2
+	babbler.Separator = " "
+	name := babbler.Babble()
+	path := fmt.Sprintf("projects/%s.md", name)
+
+	status := projectStatuses[rand.Intn(len(projectStatuses))]
+	if err := client.CreateProject(path, name, status); err != nil {
+		slog.Error("failed to create project", "name", name, "error", err)
+	}
+	return path
 }

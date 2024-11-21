@@ -34,6 +34,16 @@ const (
 	view = "agenda"
 )
 
+func HandleNew(nd notedown.Client, date time.Time) context.GlobalKeyHandler {
+	return func(ctx *context.ProgramContext, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+		key := msg.Key()
+		if key.Mod == tea.ModShift && key.Code == 'a' {
+			return ctx.Navigate(New(ctx, nd, date))
+		}
+		return nil, nil
+	}
+}
+
 func New(ctx *context.ProgramContext, nd notedown.Client, date time.Time) *Model {
 	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	m := &Model{
@@ -69,39 +79,14 @@ func (m *Model) Init() (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// Handle program level key presses and events
-	model, cmd := m.ctx.Update(msg)
-	if model != nil {
-		return model, cmd // If model is not nil, we're navigating back to the previous view
-	}
-
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+
+		// Internal to the agenda view
 		case key.Matches(msg, m.keyMap.TogglePanels):
 			m.togglePanels()
-		case key.Matches(msg, m.keyMap.AddTask):
-			return m.ctx.Navigate(m, taskeditor.New(
-				m.ctx,
-				m.nd,
-				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02")), m.date),
-			))
-		case key.Matches(msg, m.keyMap.EditTask):
-			selected := m.selectedTask()
-			if selected != nil {
-				return m.ctx.Navigate(m, taskeditor.New(
-					m.ctx,
-					m.nd,
-					taskeditor.WithEdit(*selected, m.date),
-				))
-			}
-		case key.Matches(msg, m.keyMap.DeleteTask):
-			selected := m.selectedTask()
-			if selected != nil {
-				if err := m.nd.DeleteTask(*selected); err != nil {
-					m.footer.SetMessage(fmt.Sprintf("error deleting task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
-				}
-			}
 		case key.Matches(msg, m.keyMap.NextDay):
 			m.updateDate(m.date.AddDate(0, 0, 1))
 		case key.Matches(msg, m.keyMap.PrevDay):
@@ -112,6 +97,28 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.moveUp(1)
 		case key.Matches(msg, m.keyMap.CursorDown):
 			m.moveDown(1)
+
+			// Navigation
+		case key.Matches(msg, m.keyMap.AddTask):
+			return m.ctx.Navigate(taskeditor.New(
+				m.ctx,
+				m.nd,
+				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02")), m.date),
+			))
+		case key.Matches(msg, m.keyMap.EditTask):
+			if selected := m.selectedTask(); selected != nil {
+				return m.ctx.Navigate(taskeditor.New(
+					m.ctx,
+					m.nd,
+					taskeditor.WithEdit(*selected, m.date),
+				))
+			}
+		case key.Matches(msg, m.keyMap.DeleteTask):
+			if selected := m.selectedTask(); selected != nil {
+				if err := m.nd.DeleteTask(*selected); err != nil {
+					m.footer.SetMessage(fmt.Sprintf("error deleting task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
+				}
+			}
 		}
 	}
 
@@ -120,7 +127,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateTasks()
 	}
 
+	// Handle program level key presses and events
+	model, command := m.ctx.Update(msg)
+	if model != nil { // if model is not nil we're navigating to a new view
+		return model, tea.Batch(command, cmd)
+	}
+	cmd = tea.Batch(cmd, command)
 	return m, cmd
+
 }
 
 func (m *Model) selectedTask() *tasks.Task {
@@ -165,8 +179,6 @@ func (m *Model) View() string {
 	gap := "   "
 	horizontalPadding := 2
 	verticalPadding := 1
-	h := lipgloss.Height
-	w := lipgloss.Width
 
 	header := fmt.Sprintf("← %v →", humanizeDate(m.date, time.Now()))
 

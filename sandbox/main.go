@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	fileCount = pflag.Int("files", 10, "number of files to generate")
+	fileCount = pflag.Int("files", 30, "number of files to generate (2/3rds projects, 1/3rd empty files)")
 	taskCount = pflag.Int("tasks", 300, "number of tasks to generate")
 )
 
@@ -30,7 +30,6 @@ func main() {
 	pflag.Parse()
 	tmp, _ := os.MkdirTemp("", "task-sandbox")
 
-	GenerateWorkspace(tmp, *fileCount, *taskCount)
-
 	fmt.Println(tmp)
+	GenerateWorkspace(tmp, *fileCount, *taskCount)
 }
