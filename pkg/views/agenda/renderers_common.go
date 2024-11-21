@@ -27,6 +27,7 @@ import (
 var (
 	s = lipgloss.NewStyle
 	w = lipgloss.Width
+	h = lipgloss.Height
 )
 
 func colors(theme themes.Theme, task tasks.Task) (bg, fg lipgloss.Color, err error) {

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,6 +33,7 @@ import (
 	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/notedownorg/task/pkg/themes"
 	"github.com/notedownorg/task/pkg/views/agenda"
+	"github.com/notedownorg/task/pkg/views/projectlist"
 )
 
 var (
@@ -70,17 +72,25 @@ func root(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// Create a listener for the task client to refresh the TUI when tasks are created/updated/deleted
-	// We don't need one for the daily note client because we don't need to re-render the TUI when daily notes are created/updated/deleted
-	taskSub := make(chan tasks.Event)
-	client.Subscribe(taskSub)
+	// Create a listener for the clients that need to refresh the TUI when objects are created/updated/deleted
+	taskSub, projectSub := make(chan tasks.Event), make(chan projects.Event)
+	client.Subscribe(taskSub, projectSub)
 	taskListener := listeners.NewTaskListener(taskSub)
+	projectListener := listeners.NewProjectListener(projectSub)
 
 	// Create the initial model and run the program
-	ctx := context.New(themes.CatpuccinMocha, context.WithListeners(taskListener))
-	agenda := agenda.New(ctx, client, cfg.date)
+	ctx := context.New(
+		themes.CatpuccinMocha,
+		func(ctx *context.ProgramContext) tea.Model { return agenda.New(ctx, client, cfg.date) },
+		context.WithListeners(taskListener, projectListener),
+	).SetGlobalKeyHandlers(
+		context.HandleQuit(),
+		context.HandleBack(),
+		agenda.HandleNew(client, cfg.date),
+		projectlist.HandleNew(client),
+	)
 
-	p := tea.NewProgram(agenda, tea.WithAltScreen())
+	p := tea.NewProgram(ctx, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("error running program:", err)
 		os.Exit(1)

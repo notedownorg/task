@@ -15,6 +15,8 @@
 package listeners
 
 import (
+	"log/slog"
+
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/context"
@@ -49,7 +51,9 @@ func (l *TaskListener) Receive(msg tea.Msg) tea.Cmd {
 	// If it is a TaskEvent, we need to create a new command that waits for the next task event to come in
 	// and then responds with a new TaskEvent message. This in turn will trigger a UI refresh/re-render when it resolves.
 	return func() tea.Msg {
+		slog.Debug("task listener waiting for next task event")
 		<-l.ch
+		slog.Debug("task listener received task event, sending task refresh message")
 		return TaskEvent{}
 	}
 }

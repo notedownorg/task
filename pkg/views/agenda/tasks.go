@@ -40,19 +40,17 @@ func (m *Model) updateTasks() {
 		),
 	)
 
-	doing := groupedlist.Group[tasks.Task]{Name: statusName[tasks.Doing], Items: make([]tasks.Task, 0)}
-	todo := groupedlist.Group[tasks.Task]{Name: statusName[tasks.Todo], Items: make([]tasks.Task, 0)}
-	blocked := groupedlist.Group[tasks.Task]{Name: statusName[tasks.Blocked], Items: make([]tasks.Task, 0)}
-
-	for _, t := range overdue {
-		switch t.Status() {
-		case tasks.Doing:
-			doing.Items = append(doing.Items, t)
-		case tasks.Todo:
-			todo.Items = append(todo.Items, t)
-		case tasks.Blocked:
-			blocked.Items = append(blocked.Items, t)
-		}
+	doing := groupedlist.Group[tasks.Task]{
+		Name:  statusName[tasks.Doing],
+		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Doing))(overdue),
+	}
+	todo := groupedlist.Group[tasks.Task]{
+		Name:  statusName[tasks.Todo],
+		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Todo))(overdue),
+	}
+	blocked := groupedlist.Group[tasks.Task]{
+		Name:  statusName[tasks.Blocked],
+		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Blocked))(overdue),
 	}
 
 	m.tasklist.SetGroups([]groupedlist.Group[tasks.Task]{doing, todo, blocked})

@@ -68,13 +68,7 @@ func (m *Model) Init() (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// Handle program level key presses and events
-	model, cmd := m.ctx.Update(msg)
-
-	// If model is not nil, we're navigating back to the previous view
-	if model != nil {
-		return model, cmd
-	}
+	var cmd tea.Cmd
 
 	// Handle view level key presses
 	switch msg := msg.(type) {
@@ -94,6 +88,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Attempt to parse the full task and use the response to update the fields subcomponent
 	m.parseTask()
 
+	// Handle program level key presses and events
+	model, command := m.ctx.Update(msg)
+	if model != nil { // if model is not nil we're navigating to a new view
+		return model, tea.Batch(command, cmd)
+	}
+	cmd = tea.Batch(cmd, command)
 	return m, cmd
 }
 

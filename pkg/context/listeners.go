@@ -14,7 +14,9 @@
 
 package context
 
-import tea "github.com/charmbracelet/bubbletea/v2"
+import (
+	tea "github.com/charmbracelet/bubbletea/v2"
+)
 
 type Listeners []Listener
 
