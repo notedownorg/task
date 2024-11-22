@@ -23,6 +23,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
+	"github.com/notedownorg/task/pkg/components/icons"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
@@ -152,7 +153,7 @@ func buildLeft(selected bool) func(theme themes.Theme, task tasks.Task, remainin
 	return func(theme themes.Theme, task tasks.Task, remainingSpace int, bg lipgloss.Color) string {
 		res := make([]string, 0)
 
-		i := icon(task.Status())
+		i := icons.Task(task.Status())
 		res = append(res, i, "  ")
 
 		e := every(task)

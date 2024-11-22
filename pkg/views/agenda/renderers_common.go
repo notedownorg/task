@@ -16,7 +16,6 @@ package agenda
 
 import (
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
@@ -72,24 +71,6 @@ func every(task tasks.Task) string {
 		return "󰕇"
 	}
 	return ""
-}
-
-func icon(status tasks.Status) string {
-	switch status {
-	case tasks.Todo:
-		return ""
-	case tasks.Blocked:
-		return ""
-	case tasks.Doing:
-		return ""
-	case tasks.Done:
-		return ""
-	case tasks.Abandoned:
-		return ""
-	default:
-		slog.Warn("unknown task status", "status", status)
-		return " "
-	}
 }
 
 func dayOfMonthSuffix(day int) string {

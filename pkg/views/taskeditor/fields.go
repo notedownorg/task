@@ -21,6 +21,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
+	"github.com/notedownorg/task/pkg/components/icons"
 	"github.com/notedownorg/task/pkg/components/pill"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
@@ -31,6 +32,7 @@ type Fields struct {
 
 	ctx *context.ProgramContext
 
+	Status    tasks.Status
 	Due       *time.Time
 	Scheduled *time.Time
 	Completed *time.Time
@@ -53,17 +55,11 @@ func (f *Fields) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return f, nil
 }
 
-func (f Fields) unset() bool {
-	return f.Due == nil && f.Scheduled == nil && f.Completed == nil && f.Priority == nil && f.Every == nil
-}
-
 func (f *Fields) View() string {
 	theme := f.ctx.Theme
-	if f.unset() {
-		return pill.New(theme.Panel, theme.Text).Render("no fields set")
-	}
 
 	var fields []string
+	fields = append(fields, pill.New(theme.BlueSoft, theme.TextCursor).Render(fmt.Sprintf("%s  %s", icons.Task(f.Status), statusMap[f.Status])))
 	if f.Due != nil {
 		fields = append(fields, pill.New(theme.Green, theme.TextCursor).Render("󰃭 "+f.Due.Format("2006-01-02")))
 	}
@@ -77,9 +73,17 @@ func (f *Fields) View() string {
 		fields = append(fields, pill.New(theme.Magenta, theme.TextCursor).Render("󰕇  "+f.Every.String()))
 	}
 	if f.Completed != nil {
-		fields = append(fields, pill.New(theme.BlueSoft, theme.TextCursor).Render(" "+f.Completed.Format("2006-01-02")))
+		fields = append(fields, pill.New(theme.Pink, theme.TextCursor).Render(" "+f.Completed.Format("2006-01-02")))
 	}
 
 	return f.base.NewStyle().
 		Render(strings.Join(fields, "  "))
+}
+
+var statusMap = map[tasks.Status]string{
+	tasks.Todo:      "todo",
+	tasks.Done:      "done",
+	tasks.Doing:     "doing",
+	tasks.Abandoned: "abandoned",
+	tasks.Blocked:   "blocked",
 }
