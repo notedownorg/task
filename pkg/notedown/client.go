@@ -47,6 +47,7 @@ type DailyWriter interface {
 
 type ProjectReader interface {
 	ListProjects(projects.Fetcher, ...projects.ListOption) []projects.Project
+	NewProjectLocation(string) string
 }
 
 type ProjectWriter interface {
