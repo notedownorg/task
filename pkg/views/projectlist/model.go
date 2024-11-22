@@ -24,6 +24,7 @@ import (
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/listeners"
 	"github.com/notedownorg/task/pkg/notedown"
+	"github.com/notedownorg/task/pkg/views/projectadd"
 )
 
 const (
@@ -80,11 +81,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.TogglePanels):
 			m.togglePanels()
 		case key.Matches(msg, m.keyMap.AddProject):
-			// return m.ctx.Navigate(m, taskeditor.New(
-			// 	m.ctx,
-			// 	m.nd,
-			// 	taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02")), m.date),
-			// ))
+			return m.ctx.Navigate(projectadd.New(m.ctx, m.nd))
 		case key.Matches(msg, m.keyMap.EditProject):
 			// selected := m.selectedTask()
 			// if selected != nil {
