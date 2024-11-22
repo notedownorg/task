@@ -52,6 +52,7 @@ type ProjectReader interface {
 
 type ProjectWriter interface {
 	CreateProject(string, string, projects.Status, ...projects.ProjectOption) error
+	DeleteProject(projects.Project) error
 }
 
 type Client interface {

@@ -15,6 +15,9 @@
 package projectlist
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
@@ -92,12 +95,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// 	))
 			// }
 		case key.Matches(msg, m.keyMap.DeleteProject):
-			// selected := m.selectedTask()
-			// if selected != nil {
-			// 	if err := m.nd.DeleteTask(*selected); err != nil {
-			// 		m.footer.SetMessage(fmt.Sprintf("error deleting task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
-			// 	}
-			// }
+			if selected := m.selectedProject(); selected != nil {
+				if err := m.nd.DeleteProject(*selected); err != nil {
+					m.footer.SetMessage(fmt.Sprintf("error deleting project: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
+				}
+			}
 		case key.Matches(msg, m.keyMap.CursorUp):
 			m.moveUp(1)
 		case key.Matches(msg, m.keyMap.CursorDown):
