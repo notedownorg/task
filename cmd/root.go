@@ -78,15 +78,20 @@ func root(cmd *cobra.Command, args []string) {
 	taskListener := listeners.NewTaskListener(taskSub)
 	projectListener := listeners.NewProjectListener(projectSub)
 
+	opts := make([]context.ProgramContextOption, 0)
+	opts = append(opts, context.WithListeners(taskListener, projectListener))
+	if cfg.date != nil {
+		opts = append(opts, context.WithClock(func() time.Time { return *cfg.date }))
+	}
+
 	// Create the initial model and run the program
 	ctx := context.New(
 		themes.CatpuccinMocha,
-		func(ctx *context.ProgramContext) tea.Model { return agenda.New(ctx, client, cfg.date) },
-		context.WithListeners(taskListener, projectListener),
+		func(ctx *context.ProgramContext) tea.Model { return agenda.New(ctx, client) },
+		opts...,
 	).SetGlobalKeyHandlers(
 		context.HandleQuit(),
 		context.HandleBack(),
-		agenda.HandleNew(client, cfg.date),
 		projectlist.HandleNew(client),
 	)
 
@@ -113,7 +118,7 @@ func init() {
 type config struct {
 	home string
 	root string
-	date time.Time
+	date *time.Time
 }
 
 func loadConfig() config {
@@ -125,10 +130,10 @@ func loadConfig() config {
 	}
 
 	// Time should always be now, but for testing purposes we allow it to be set with a hidden env var
-	cfg.date = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC)
 	if t := os.Getenv("TEST_DATE"); t != "" {
 		if tt, err := time.Parse("2006-01-02", t); err == nil {
-			cfg.date = tt
+			tt = tt.UTC()
+			cfg.date = &tt
 		}
 	}
 

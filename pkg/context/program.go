@@ -15,7 +15,7 @@
 package context
 
 import (
-	"log/slog"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/notedownorg/task/pkg/themes"
@@ -39,21 +39,32 @@ type ProgramContext struct {
 
 	KeyHandlers []GlobalKeyHandler
 
+	// clock acts as the "system" clock for the program, if nil uses time.Now()
+	// typically this would only be set (pinned) for testing purposes.
+	clock func() time.Time
+
 	initialView tea.Model
 }
 
 type ProgramContextOption func(*ProgramContext)
+
+func WithClock(fn func() time.Time) ProgramContextOption {
+	return func(p *ProgramContext) {
+		p.clock = fn
+	}
+}
 
 type InitalViewBuilder func(*ProgramContext) tea.Model
 
 func New(theme themes.Theme, initial InitalViewBuilder, opts ...ProgramContextOption) *ProgramContext {
 	p := &ProgramContext{Theme: theme}
 
-	p.initialView, _ = p.Navigate(initial(p))
-
 	for _, opt := range opts {
 		opt(p)
 	}
+
+	// Build the initial view after the options have been applied in case they affect the view.
+	p.initialView, _ = p.Navigate(initial(p))
 	return p
 }
 
@@ -80,25 +91,12 @@ func (c *ProgramContext) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return nil, c.Listeners.Receive(msg)
 }
 
-func (c *ProgramContext) Back() tea.Model {
-	// As history includes the current model, check that we are not at the beginning of the history.
-	// Then pop the current and return the previous
-	if c.History.Len() > 1 {
-		c.History.Pop()
-		m, _ := c.History.Peek()
-		return m
+func (c ProgramContext) Now() time.Time {
+	if c.clock == nil {
+		return time.Now().UTC()
 	}
-
-	// Return nil if there is no history to go back to.
-	slog.Debug("we've reached the beginning of the navigation history so there is no view to navigate back to")
-	return nil
+	return c.clock()
 }
-
-func (c *ProgramContext) Navigate(next tea.Model) (tea.Model, tea.Cmd) {
-	c.History.Push(next)
-	return next, nil
-}
-
 func (c *ProgramContext) onWindowResize(msg tea.WindowSizeMsg) {
 	c.ScreenHeight = msg.Height
 	c.ScreenWidth = msg.Width

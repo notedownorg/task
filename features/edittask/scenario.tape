@@ -31,4 +31,15 @@ Type "This task is no longer blocked!"
 Sleep 1
 Enter
 
+# Reschedule the unblocked task to tomorrow
+Up
+Sleep 1
+Type "r"
+Sleep 1
+Type "1"
+Sleep 1
+Right
+Sleep 2
+Left
+
 Sleep 5

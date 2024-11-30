@@ -15,15 +15,38 @@
 package agenda
 
 import (
+	"time"
+
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
+	"github.com/notedownorg/task/pkg/notedown"
 )
 
 func (m *Model) updateTasks() {
-	prev := m.date.Add(-1)
-	next := m.date.AddDate(0, 0, 1).Add(-1)
+	due := due(m.nd, m.date)
+	done := done(m.nd, m.date)
 
-	overdue := m.nd.ListTasks(
+	doing := groupedlist.Group[tasks.Task]{
+		Name:  statusName[tasks.Doing],
+		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Doing))(due),
+	}
+	todo := groupedlist.Group[tasks.Task]{
+		Name:  statusName[tasks.Todo],
+		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Todo))(due),
+	}
+	blocked := groupedlist.Group[tasks.Task]{
+		Name:  statusName[tasks.Blocked],
+		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Blocked))(due),
+	}
+
+	m.tasklist.SetGroups([]groupedlist.Group[tasks.Task]{doing, todo, blocked})
+	m.completed.SetGroups([]groupedlist.Group[tasks.Task]{{Name: "Completed", Items: done}})
+}
+
+func due(nd notedown.Client, date time.Time) []tasks.Task {
+	next := time.Date(date.Year(), date.Month(), date.Day()+1, 0, 0, 0, 0, date.Location()).Add(-time.Second)
+
+	return nd.ListTasks(
 		tasks.FetchAllTasks(),
 		tasks.WithFilter(
 			tasks.And(
@@ -39,23 +62,13 @@ func (m *Model) updateTasks() {
 			tasks.SortByPriority(),
 		),
 	)
+}
 
-	doing := groupedlist.Group[tasks.Task]{
-		Name:  statusName[tasks.Doing],
-		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Doing))(overdue),
-	}
-	todo := groupedlist.Group[tasks.Task]{
-		Name:  statusName[tasks.Todo],
-		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Todo))(overdue),
-	}
-	blocked := groupedlist.Group[tasks.Task]{
-		Name:  statusName[tasks.Blocked],
-		Items: tasks.WithFilter(tasks.FilterByStatus(tasks.Blocked))(overdue),
-	}
+func done(nd notedown.Client, date time.Time) []tasks.Task {
+	prev := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	next := time.Date(date.Year(), date.Month(), date.Day()+1, 0, 0, 0, 0, date.Location()).Add(-time.Second)
 
-	m.tasklist.SetGroups([]groupedlist.Group[tasks.Task]{doing, todo, blocked})
-
-	done := m.nd.ListTasks(
+	return nd.ListTasks(
 		tasks.FetchAllTasks(),
 		tasks.WithFilter(
 			tasks.And(
@@ -65,7 +78,6 @@ func (m *Model) updateTasks() {
 		),
 		tasks.WithSorters(), // empty defaults to alphabetical
 	)
-	m.completed.SetGroups([]groupedlist.Group[tasks.Task]{{Name: "Completed", Items: done}})
 }
 
 var statusName = map[tasks.Status]string{

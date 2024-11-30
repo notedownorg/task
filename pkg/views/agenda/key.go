@@ -28,6 +28,8 @@ type KeyMap struct {
 
 	CursorUp   key.Binding
 	CursorDown key.Binding
+
+	RescheduleTask key.Binding
 }
 
 var DefaultKeyMap = KeyMap{
@@ -56,8 +58,8 @@ var DefaultKeyMap = KeyMap{
 		key.WithHelp("←/h", "previous day"),
 	),
 	ResetDate: key.NewBinding(
-		key.WithKeys("r"),
-		key.WithHelp("r", "reset date to today"),
+		key.WithKeys("home", "0"),
+		key.WithHelp("home/0", "reset date to today"),
 	),
 	CursorUp: key.NewBinding(
 		key.WithKeys("k", "up"),
@@ -66,5 +68,9 @@ var DefaultKeyMap = KeyMap{
 	CursorDown: key.NewBinding(
 		key.WithKeys("j", "down"),
 		key.WithHelp("↓/j", "move cursor down"),
+	),
+	RescheduleTask: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "reschedule a task"),
 	),
 }

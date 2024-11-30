@@ -28,24 +28,25 @@ import (
 	"github.com/notedownorg/task/pkg/listeners"
 	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/notedownorg/task/pkg/views/taskeditor"
+	"github.com/notedownorg/task/pkg/views/taskreschedule"
 )
 
 const (
 	view = "agenda"
 )
 
-func HandleNew(nd notedown.Client, date time.Time) context.GlobalKeyHandler {
+func HandleNew(nd notedown.Client) context.GlobalKeyHandler {
 	return func(ctx *context.ProgramContext, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		key := msg.Key()
 		if key.Mod == tea.ModShift && key.Code == 'a' {
-			return ctx.Navigate(New(ctx, nd, date))
+			return ctx.Navigate(New(ctx, nd))
 		}
 		return nil, nil
 	}
 }
 
-func New(ctx *context.ProgramContext, nd notedown.Client, date time.Time) *Model {
-	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+func New(ctx *context.ProgramContext, nd notedown.Client) *Model {
+	date := time.Date(ctx.Now().Year(), ctx.Now().Month(), ctx.Now().Day(), 0, 0, 0, 0, ctx.Now().Location())
 	m := &Model{
 		ctx: ctx,
 		nd:  nd,
@@ -98,7 +99,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.CursorDown):
 			m.moveDown(1)
 
-			// Navigation
+		// Navigation
 		case key.Matches(msg, m.keyMap.AddTask):
 			return m.ctx.Navigate(taskeditor.New(
 				m.ctx,
@@ -113,6 +114,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					taskeditor.WithEdit(*selected, m.date),
 				))
 			}
+
+		// Task operations
+		case key.Matches(msg, m.keyMap.RescheduleTask):
+			if selected := m.selectedTask(); selected != nil {
+				return m.ctx.Navigate(taskreschedule.New(m.ctx, m.nd, selected))
+			}
+
 		case key.Matches(msg, m.keyMap.DeleteTask):
 			if selected := m.selectedTask(); selected != nil {
 				if err := m.nd.DeleteTask(*selected); err != nil {
@@ -122,8 +130,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// If the task client has emitted an event, update the tasks
+	// If the task client has emitted an event, refresh the tasks
 	if _, ok := msg.(listeners.TaskEvent); ok {
+		m.updateTasks()
+	}
+
+	// If the we're being navigated back to, refresh the tasks
+	// This is mostly just in case we miss the task event on an add/edit/etc
+	if _, ok := msg.(context.NavigationEvent); ok {
 		m.updateTasks()
 	}
 
