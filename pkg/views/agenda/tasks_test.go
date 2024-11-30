@@ -104,14 +104,14 @@ func TestDone(t *testing.T) {
 		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %ds", i), tasks.Done, tasks.WithCompleted(date)); err != nil {
 			t.Fatal(err)
 		}
-		time.Sleep(time.Millisecond * 100) // if we write too fast the tasks will all have the same timestamp
+		time.Sleep(time.Millisecond * 150) // if we write too fast the tasks will all have the same timestamp
 	}
 	// Wait until the tasks are loaded into the cache
 	for i := 0; i < 20; i++ {
 		if len(nd.ListTasks(tasks.FetchAllTasks())) == len(dates) {
 			break
 		}
-		time.Sleep(time.Millisecond * 150)
+		time.Sleep(time.Millisecond * 100)
 		if i == 19 {
 			t.Fatal(fmt.Sprintf("not all tasks loaded, got %d, want %d", len(nd.ListTasks(tasks.FetchAllTasks())), len(dates)))
 		}
