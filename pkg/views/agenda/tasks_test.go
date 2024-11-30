@@ -53,6 +53,9 @@ func TestDue(t *testing.T) {
 			break
 		}
 		time.Sleep(time.Millisecond * 100)
+        if i == 19 {
+            t.Fatal(fmt.Sprintf("not all tasks loaded, got %d, want %d", len(nd.ListTasks(tasks.FetchAllTasks())), len(dates)*2))
+        }
 	}
 
 	tests := []struct {
@@ -109,6 +112,9 @@ func TestDone(t *testing.T) {
 			break
 		}
 		time.Sleep(time.Millisecond * 100)
+        if i == 19 {
+            t.Fatal(fmt.Sprintf("not all tasks loaded, got %d, want %d", len(nd.ListTasks(tasks.FetchAllTasks())), len(dates)))
+        }
 	}
 
 	tests := []struct {
