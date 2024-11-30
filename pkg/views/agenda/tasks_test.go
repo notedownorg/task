@@ -17,17 +17,16 @@ package agenda
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/notedown"
 )
 
 func TestDue(t *testing.T) {
 	// slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug.Level()})))
-	nd := ndclient(t)
 
 	now := time.Now().UTC()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
@@ -37,26 +36,22 @@ func TestDue(t *testing.T) {
 	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
 
 	// create a task for each time both due and scheduled
+    tsks := make([]tasks.Task, 0)
 	for i, due := range dates {
-		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %ds", i), tasks.Todo, tasks.WithDue(due)); err != nil {
-			t.Fatal(err)
-		}
-		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %dd", i), tasks.Todo, tasks.WithScheduled(due)); err != nil {
-			t.Fatal(err)
-		}
-		time.Sleep(time.Millisecond * 200) // if we write too fast the tasks will all have the same timestamp
+        tsks = append(tsks, tasks.NewTask(
+            tasks.NewIdentifier("", "", 0),
+            fmt.Sprintf("task %ds", i),
+            tasks.Todo,
+            tasks.WithDue(due),
+        ))
+        tsks = append(tsks, tasks.NewTask(
+            tasks.NewIdentifier("", "", 0),
+            fmt.Sprintf("task %dd", i),
+            tasks.Todo,
+            tasks.WithScheduled(due),
+        ))
 	}
-
-	// Wait until the tasks are loaded into the cache
-	for i := 0; i < 20; i++ {
-		if len(nd.ListTasks(tasks.FetchAllTasks())) == len(dates)*2 {
-			break
-		}
-		time.Sleep(time.Millisecond * 100)
-		if i == 19 {
-			t.Fatal(fmt.Sprintf("not all tasks loaded, got %d, want %d", len(nd.ListTasks(tasks.FetchAllTasks())), len(dates)*2))
-		}
-	}
+	nd := ndclient(t, tsks...)
 
 	tests := []struct {
 		name string
@@ -90,8 +85,6 @@ func TestDue(t *testing.T) {
 }
 
 func TestDone(t *testing.T) {
-	nd := ndclient(t)
-
 	now := time.Now().UTC()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
@@ -100,22 +93,16 @@ func TestDone(t *testing.T) {
 	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
 
 	// create a task for each time
+    tsks := make([]tasks.Task, 0)
 	for i, date := range dates {
-		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %ds", i), tasks.Done, tasks.WithCompleted(date)); err != nil {
-			t.Fatal(err)
-		}
-		time.Sleep(time.Millisecond * 200) // if we write too fast the tasks will all have the same timestamp
+        tsks = append(tsks, tasks.NewTask(
+            tasks.NewIdentifier("", "", 0),
+            fmt.Sprintf("task %d", i),
+            tasks.Done,
+            tasks.WithCompleted(date),
+        ))
 	}
-	// Wait until the tasks are loaded into the cache
-	for i := 0; i < 20; i++ {
-		if len(nd.ListTasks(tasks.FetchAllTasks())) == len(dates) {
-			break
-		}
-		time.Sleep(time.Millisecond * 100)
-		if i == 19 {
-			t.Fatal(fmt.Sprintf("not all tasks loaded, got %d, want %d", len(nd.ListTasks(tasks.FetchAllTasks())), len(dates)))
-		}
-	}
+	nd := ndclient(t, tsks...)
 
 	tests := []struct {
 		name string
@@ -148,9 +135,16 @@ func TestDone(t *testing.T) {
 	}
 }
 
-func ndclient(t *testing.T) notedown.Client {
+func ndclient(t *testing.T, tsks ...tasks.Task) notedown.Client {
 	tmpDir := os.TempDir()
-	if err := os.WriteFile(tmpDir+"/test.md", []byte("# test\n\n"), 0644); err != nil {
+
+    var b strings.Builder
+    b.WriteString("# test\n")
+    for _, t := range tsks {
+        b.WriteString(fmt.Sprintf("%s\n", t))
+    }
+    content := b.String()
+	if err := os.WriteFile(tmpDir+"/test.md", []byte(content), 0644); err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("created %s/test.md", tmpDir)
