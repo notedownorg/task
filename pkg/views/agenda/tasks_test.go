@@ -44,7 +44,7 @@ func TestDue(t *testing.T) {
 		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %dd", i), tasks.Todo, tasks.WithScheduled(due)); err != nil {
 			t.Fatal(err)
 		}
-		time.Sleep(time.Millisecond * 150) // if we write too fast the tasks will all have the same timestamp
+		time.Sleep(time.Millisecond * 200) // if we write too fast the tasks will all have the same timestamp
 	}
 
 	// Wait until the tasks are loaded into the cache
@@ -104,7 +104,7 @@ func TestDone(t *testing.T) {
 		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %ds", i), tasks.Done, tasks.WithCompleted(date)); err != nil {
 			t.Fatal(err)
 		}
-		time.Sleep(time.Millisecond * 150) // if we write too fast the tasks will all have the same timestamp
+		time.Sleep(time.Millisecond * 200) // if we write too fast the tasks will all have the same timestamp
 	}
 	// Wait until the tasks are loaded into the cache
 	for i := 0; i < 20; i++ {
