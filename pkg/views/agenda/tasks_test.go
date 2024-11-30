@@ -34,9 +34,10 @@ func TestDue(t *testing.T) {
 	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
 	justBefore := startOfDay.Add(time.Second * -1)
 	justAfter := endOfDay.Add(time.Second)
+	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
 
 	// create a task for each time both due and scheduled
-	for i, due := range []time.Time{justBefore, startOfDay, now, endOfDay, justAfter} {
+	for i, due := range dates {
 		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %ds", i), tasks.Todo, tasks.WithDue(due)); err != nil {
 			t.Fatal(err)
 		}
@@ -45,7 +46,14 @@ func TestDue(t *testing.T) {
 		}
 		time.Sleep(time.Millisecond * 100) // if we write too fast the tasks will all have the same timestamp
 	}
-    time.Sleep(time.Second) // wait for the tasks to be loaded into the cache
+
+	// Wait until the tasks are loaded into the cache
+	for i := 0; i < 20; i++ {
+		if len(nd.ListTasks(tasks.FetchAllTasks())) == len(dates)*2 {
+			break
+		}
+		time.Sleep(time.Millisecond * 100)
+	}
 
 	tests := []struct {
 		name string
@@ -86,15 +94,22 @@ func TestDone(t *testing.T) {
 	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
 	justBefore := startOfDay.Add(time.Second * -1)
 	justAfter := endOfDay.Add(time.Second)
+	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
 
 	// create a task for each time
-	for i, date := range []time.Time{justBefore, startOfDay, now, endOfDay, justAfter} {
+	for i, date := range dates {
 		if err := nd.CreateTask("test.md", writer.AT_END, fmt.Sprintf("task %ds", i), tasks.Done, tasks.WithCompleted(date)); err != nil {
 			t.Fatal(err)
 		}
 		time.Sleep(time.Millisecond * 100) // if we write too fast the tasks will all have the same timestamp
 	}
-    time.Sleep(time.Second) // wait for the tasks to be loaded into the cache
+	// Wait until the tasks are loaded into the cache
+	for i := 0; i < 20; i++ {
+		if len(nd.ListTasks(tasks.FetchAllTasks())) == len(dates) {
+			break
+		}
+		time.Sleep(time.Millisecond * 100)
+	}
 
 	tests := []struct {
 		name string
