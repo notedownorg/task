@@ -45,6 +45,7 @@ func TestDue(t *testing.T) {
 		}
 		time.Sleep(time.Millisecond * 100) // if we write too fast the tasks will all have the same timestamp
 	}
+    time.Sleep(time.Second) // wait for the tasks to be loaded into the cache
 
 	tests := []struct {
 		name string
@@ -71,7 +72,7 @@ func TestDue(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := len(due(nd, tt.date))
 			if got != tt.want {
-				t.Errorf("due() = %v, want %v", got, tt.want)
+				t.Errorf("due() = %v, want %v, all %v", got, tt.want, len(nd.ListTasks(tasks.FetchAllTasks())))
 			}
 		})
 	}
@@ -93,6 +94,7 @@ func TestDone(t *testing.T) {
 		}
 		time.Sleep(time.Millisecond * 100) // if we write too fast the tasks will all have the same timestamp
 	}
+    time.Sleep(time.Second) // wait for the tasks to be loaded into the cache
 
 	tests := []struct {
 		name string
@@ -119,7 +121,7 @@ func TestDone(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := len(done(nd, tt.date))
 			if got != tt.want {
-				t.Errorf("done() = %v, want %v", got, tt.want)
+				t.Errorf("done() = %v, want %v, all %v", got, tt.want, len(nd.ListTasks(tasks.FetchAllTasks())))
 			}
 		})
 	}
