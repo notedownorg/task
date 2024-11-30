@@ -36,20 +36,20 @@ func TestDue(t *testing.T) {
 	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
 
 	// create a task for each time both due and scheduled
-    tsks := make([]tasks.Task, 0)
+	tsks := make([]tasks.Task, 0)
 	for i, due := range dates {
-        tsks = append(tsks, tasks.NewTask(
-            tasks.NewIdentifier("", "", 0),
-            fmt.Sprintf("task %ds", i),
-            tasks.Todo,
-            tasks.WithDue(due),
-        ))
-        tsks = append(tsks, tasks.NewTask(
-            tasks.NewIdentifier("", "", 0),
-            fmt.Sprintf("task %dd", i),
-            tasks.Todo,
-            tasks.WithScheduled(due),
-        ))
+		tsks = append(tsks, tasks.NewTask(
+			tasks.NewIdentifier("", "", 0),
+			fmt.Sprintf("task %ds", i),
+			tasks.Todo,
+			tasks.WithDue(due),
+		))
+		tsks = append(tsks, tasks.NewTask(
+			tasks.NewIdentifier("", "", 0),
+			fmt.Sprintf("task %dd", i),
+			tasks.Todo,
+			tasks.WithScheduled(due),
+		))
 	}
 	nd := ndclient(t, tsks...)
 
@@ -93,14 +93,14 @@ func TestDone(t *testing.T) {
 	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
 
 	// create a task for each time
-    tsks := make([]tasks.Task, 0)
+	tsks := make([]tasks.Task, 0)
 	for i, date := range dates {
-        tsks = append(tsks, tasks.NewTask(
-            tasks.NewIdentifier("", "", 0),
-            fmt.Sprintf("task %d", i),
-            tasks.Done,
-            tasks.WithCompleted(date),
-        ))
+		tsks = append(tsks, tasks.NewTask(
+			tasks.NewIdentifier("", "", 0),
+			fmt.Sprintf("task %d", i),
+			tasks.Done,
+			tasks.WithCompleted(date),
+		))
 	}
 	nd := ndclient(t, tsks...)
 
@@ -138,12 +138,12 @@ func TestDone(t *testing.T) {
 func ndclient(t *testing.T, tsks ...tasks.Task) notedown.Client {
 	tmpDir := os.TempDir()
 
-    var b strings.Builder
-    b.WriteString("# test\n")
-    for _, t := range tsks {
-        b.WriteString(fmt.Sprintf("%s\n", t))
-    }
-    content := b.String()
+	var b strings.Builder
+	b.WriteString("# test\n")
+	for _, t := range tsks {
+		b.WriteString(fmt.Sprintf("%s\n", t))
+	}
+	content := b.String()
 	if err := os.WriteFile(tmpDir+"/test.md", []byte(content), 0644); err != nil {
 		t.Fatal(err)
 	}
