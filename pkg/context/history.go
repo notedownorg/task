@@ -14,7 +14,11 @@
 
 package context
 
-import tea "github.com/charmbracelet/bubbletea/v2"
+import (
+	"log/slog"
+
+	tea "github.com/charmbracelet/bubbletea/v2"
+)
 
 // History is a stack of models that the user has navigated through.
 type History struct {
@@ -44,4 +48,28 @@ func (h History) Peek() (tea.Model, bool) {
 
 func (h History) Len() int {
 	return len(h.Items)
+}
+
+type NavigationEvent struct{}
+
+func (c *ProgramContext) Back() tea.Model {
+	// As history includes the current model, check that we are not at the beginning of the history.
+	// Then pop the current and return the previous
+	if c.History.Len() > 1 {
+		c.History.Pop()
+		m, _ := c.History.Peek()
+
+		// Call update before returning the model to allow the view to update itself.
+		m.Update(&NavigationEvent{})
+		return m
+	}
+
+	// Return nil if there is no history to go back to.
+	slog.Debug("we've reached the beginning of the navigation history so there is no view to navigate back to")
+	return nil
+}
+
+func (c *ProgramContext) Navigate(next tea.Model) (tea.Model, tea.Cmd) {
+	c.History.Push(next)
+	return next, nil
 }

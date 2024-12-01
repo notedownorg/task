@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: hygiene verify tidy features gifs dirty format licenser dev
+.PHONY: hygiene verify tidy features gifs dirty format licenser dev test
 
 hygiene: tidy format licenser
 
@@ -21,6 +21,9 @@ tidy:
 
 features:
 	nix develop --command go run features/main.go
+
+test:
+	nix develop --command go test ./...
 
 gifs: 
 	nix develop --command go run features/main.go --generate-gifs
