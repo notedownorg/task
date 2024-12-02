@@ -115,10 +115,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				))
 			}
 
-		// Task operations
+		// Other Task operations
 		case key.Matches(msg, m.keyMap.RescheduleTask):
 			if selected := m.selectedTask(); selected != nil {
 				return m.ctx.Navigate(taskreschedule.New(m.ctx, m.nd, selected))
+			}
+
+		case key.Matches(msg, m.keyMap.CompleteTask):
+			if selected := m.selectedTask(); selected != nil {
+				t := tasks.NewTaskFromTask(*selected, tasks.WithStatus(tasks.Done, m.ctx.Now()))
+				if err := m.nd.UpdateTask(t); err != nil {
+					m.footer.SetMessage(fmt.Sprintf("error completing task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
+				}
 			}
 
 		case key.Matches(msg, m.keyMap.DeleteTask):
