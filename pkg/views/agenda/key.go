@@ -18,9 +18,6 @@ import "github.com/charmbracelet/bubbles/v2/key"
 
 type KeyMap struct {
 	TogglePanels key.Binding
-	AddTask      key.Binding
-	EditTask     key.Binding
-	DeleteTask   key.Binding
 
 	NextDay   key.Binding
 	PrevDay   key.Binding
@@ -29,25 +26,17 @@ type KeyMap struct {
 	CursorUp   key.Binding
 	CursorDown key.Binding
 
+	AddTask        key.Binding
+	EditTask       key.Binding
+	DeleteTask     key.Binding
 	RescheduleTask key.Binding
+	CompleteTask   key.Binding
 }
 
 var DefaultKeyMap = KeyMap{
 	TogglePanels: key.NewBinding(
 		key.WithKeys("tab"),
 		key.WithHelp("tab", "toggle main list and completed tasks"),
-	),
-	AddTask: key.NewBinding(
-		key.WithKeys("a"),
-		key.WithHelp("a", "add a new task"),
-	),
-	EditTask: key.NewBinding(
-		key.WithKeys("e"),
-		key.WithHelp("e", "edit a task"),
-	),
-	DeleteTask: key.NewBinding(
-		key.WithKeys("d"),
-		key.WithHelp("d", "delete a task"),
 	),
 	NextDay: key.NewBinding(
 		key.WithKeys("l", "right"),
@@ -69,8 +58,24 @@ var DefaultKeyMap = KeyMap{
 		key.WithKeys("j", "down"),
 		key.WithHelp("↓/j", "move cursor down"),
 	),
+	AddTask: key.NewBinding(
+		key.WithKeys("a"),
+		key.WithHelp("a", "add a new task"),
+	),
+	EditTask: key.NewBinding(
+		key.WithKeys("e"),
+		key.WithHelp("e", "edit the selected task"),
+	),
+	DeleteTask: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "delete the selected task"),
+	),
 	RescheduleTask: key.NewBinding(
 		key.WithKeys("r"),
-		key.WithHelp("r", "reschedule a task"),
+		key.WithHelp("r", "reschedule the selected task"),
+	),
+	CompleteTask: key.NewBinding(
+		key.WithKeys("x"),
+		key.WithHelp("x", "complete the selected task"),
 	),
 }
