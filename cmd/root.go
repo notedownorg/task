@@ -93,6 +93,7 @@ func root(cmd *cobra.Command, args []string) {
 		context.HandleQuit(),
 		context.HandleBack(),
 		projectlist.HandleNew(client),
+		agenda.HandleNew(client),
 	)
 
 	p := tea.NewProgram(ctx, tea.WithAltScreen())

@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-alpha.1
 	github.com/charmbracelet/lipgloss v0.13.1
 	github.com/mattn/go-runewidth v0.0.16
-	github.com/notedownorg/notedown v0.0.0-20241130225340-3e0470f0f24e
+	github.com/notedownorg/notedown v0.0.0-20241204153509-089554a54572
 	github.com/otiai10/copy v1.14.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5

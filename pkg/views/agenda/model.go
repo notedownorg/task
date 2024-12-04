@@ -20,13 +20,13 @@ import (
 
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/listeners"
 	"github.com/notedownorg/task/pkg/notedown"
+	"github.com/notedownorg/task/pkg/styling/tasklists"
 	"github.com/notedownorg/task/pkg/views/taskeditor"
 	"github.com/notedownorg/task/pkg/views/taskreschedule"
 )
@@ -54,10 +54,10 @@ func New(ctx *context.ProgramContext, nd notedown.Client) *Model {
 		keyMap: DefaultKeyMap,
 		date:   date,
 
-		completed: groupedlist.New(groupedlist.WithRenderers(completedRendererFuncs(ctx.Theme))),
+		completed: groupedlist.New(groupedlist.WithRenderers(tasklists.CompletedRenderers(ctx.Theme))),
 		footer:    statusbar.New(ctx, statusbar.NewMode(view, statusbar.ActionNeutral), nd),
 	}
-	m.tasklist = groupedlist.New(groupedlist.WithRenderers(mainRendererFuncs(ctx.Theme, func() time.Time { return m.date }))).Focus()
+	m.tasklist = groupedlist.New(groupedlist.WithRenderers(tasklists.MainRenderers(ctx.Theme, func() time.Time { return m.date }))).Focus()
 	m.updateTasks()
 	return m
 }
@@ -143,7 +143,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateTasks()
 	}
 
-	// If the we're being navigated back to, refresh the tasks
+	// If we're being navigated back to, refresh the tasks
 	// This is mostly just in case we miss the task event on an add/edit/etc
 	if _, ok := msg.(context.NavigationEvent); ok {
 		m.updateTasks()
@@ -195,55 +195,4 @@ func (m *Model) moveDown(n int) {
 func (m *Model) updateDate(date time.Time) {
 	m.date = date
 	m.updateTasks()
-}
-
-func (m *Model) View() string {
-	gap := "   "
-	horizontalPadding := 2
-	verticalPadding := 1
-
-	header := fmt.Sprintf("← %v →", humanizeDate(m.date, time.Now()))
-
-	footer := m.footer.
-		Width(m.ctx.ScreenWidth - horizontalPadding*2).
-		View()
-
-	completed := m.completed.
-		Height(m.ctx.ScreenHeight - h(footer) - h(header) - verticalPadding*2 - 2). // -2 for the gaps
-		Width(m.ctx.ScreenWidth/4 - horizontalPadding*2).
-		View()
-
-	tasklist := m.tasklist.
-		Height(m.ctx.ScreenHeight - h(footer) - h(header) - verticalPadding*2 - 2). // -2 for the gaps
-		Width(m.ctx.ScreenWidth - w(completed) - horizontalPadding*2 - 3).          // -3 for the gap
-		View()
-
-	main := lipgloss.JoinHorizontal(lipgloss.Left, tasklist, gap, completed)
-	panel := lipgloss.JoinVertical(lipgloss.Top, header, gap, main, gap, footer)
-
-	return lipgloss.NewStyle().Padding(verticalPadding, horizontalPadding).Render(panel)
-}
-
-func humanizeDate(date time.Time, relativeTo time.Time) string {
-	rel := time.Date(relativeTo.Year(), relativeTo.Month(), relativeTo.Day(), 0, 0, 0, 0, time.UTC)
-	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
-	diff := date.Sub(rel) / (24 * time.Hour)
-
-	switch diff {
-	case -6, -5, -4, -3, -2:
-		return fmt.Sprintf("Last %s", date.Weekday().String())
-	case -1:
-		return "Yesterday"
-	case 0:
-		return "Today"
-	case 1:
-		return "Tomorrow"
-	case 2, 3, 4, 5, 6:
-		return date.Weekday().String()
-	}
-
-	if date.Year() == relativeTo.Year() {
-		return date.Format("Monday, January 2")
-	}
-	return date.Format("Monday, January 2, 2006")
 }

@@ -52,6 +52,8 @@ type ProjectReader interface {
 
 type ProjectWriter interface {
 	CreateProject(string, string, projects.Status, ...projects.ProjectOption) error
+	UpdateProject(projects.Project) error
+	RenameProject(projects.Project, string) error
 	DeleteProject(projects.Project) error
 }
 

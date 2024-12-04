@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package agenda
+package tasklists
 
 import (
 	"log/slog"
@@ -23,11 +23,12 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
-	"github.com/notedownorg/task/pkg/components/icons"
+	"github.com/notedownorg/task/pkg/styling/colors"
+	"github.com/notedownorg/task/pkg/styling/icons"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
-func mainRendererFuncs(theme themes.Theme, dateRetriever func() time.Time) groupedlist.Renderers[tasks.Task] {
+func MainRenderers(theme themes.Theme, dateRetriever func() time.Time) groupedlist.Renderers[tasks.Task] {
 	paddingHorizontal := 2
 
 	return groupedlist.Renderers[tasks.Task]{
@@ -67,7 +68,7 @@ func mainRendererFuncs(theme themes.Theme, dateRetriever func() time.Time) group
 		},
 
 		Item: func(task tasks.Task, width int) string {
-			bg, fg, err := colors(theme, task)
+			bg, fg, err := colors.Task(theme, task.Status())
 			if err != nil {
 				slog.Warn("unexpected task status", "status", task.Status())
 				return ""
@@ -85,7 +86,7 @@ func mainRendererFuncs(theme themes.Theme, dateRetriever func() time.Time) group
 		},
 
 		Selected: func(task tasks.Task, width int) string {
-			bg, fg, err := selectedColors(theme, task)
+			bg, fg, err := colors.TaskSelected(theme, task.Status())
 			if err != nil {
 				slog.Warn("unexpected task status", "status", task.Status())
 				return ""

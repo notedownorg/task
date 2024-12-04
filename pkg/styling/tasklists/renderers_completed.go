@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package agenda
+package tasklists
 
 import (
 	"log/slog"
@@ -22,11 +22,11 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
-	"github.com/notedownorg/task/pkg/components/icons"
+	"github.com/notedownorg/task/pkg/styling/icons"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
-func completedRendererFuncs(theme themes.Theme) groupedlist.Renderers[tasks.Task] {
+func CompletedRenderers(theme themes.Theme) groupedlist.Renderers[tasks.Task] {
 	paddingHorizontal := 2
 
 	return groupedlist.Renderers[tasks.Task]{

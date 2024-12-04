@@ -22,6 +22,8 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
+	"github.com/notedownorg/task/pkg/styling/colors"
+	"github.com/notedownorg/task/pkg/styling/icons"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
@@ -65,7 +67,7 @@ func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[projects.Projec
 		},
 
 		Item: func(project projects.Project, width int) string {
-			bg, fg, err := colors(theme, project)
+			bg, fg, err := colors.Project(theme, project.Status())
 			if err != nil {
 				slog.Warn("unexpected project status", "status", project.Status())
 				return ""
@@ -83,7 +85,7 @@ func mainRendererFuncs(theme themes.Theme) groupedlist.Renderers[projects.Projec
 		},
 
 		Selected: func(project projects.Project, width int) string {
-			bg, fg, err := selectedColors(theme, project)
+			bg, fg, err := colors.ProjectSelected(theme, project.Status())
 			if err != nil {
 				slog.Warn("unexpected project status", "status", project.Status())
 				return ""
@@ -114,7 +116,7 @@ func buildLeft(selected bool) func(theme themes.Theme, project projects.Project,
 	return func(theme themes.Theme, project projects.Project, remainingSpace int, bg lipgloss.Color) string {
 		res := make([]string, 0)
 
-		i := icon(project.Status())
+		i := icons.Project(project.Status())
 		res = append(res, i, "  ")
 
 		textWidth := remainingSpace - w(i)

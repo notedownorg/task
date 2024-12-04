@@ -22,6 +22,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
+	"github.com/notedownorg/task/pkg/styling/icons"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
@@ -50,7 +51,7 @@ func closedRendererFuncs(theme themes.Theme) groupedlist.Renderers[projects.Proj
 		},
 		Item: func(project projects.Project, width int) string {
 			fields := []string{
-				icon(project.Status()),
+				icons.Project(project.Status()),
 				s().Render(runewidth.Truncate(project.Name(), width-paddingHorizontal*2-3, "…")), // need to account for icon and padding
 			}
 
@@ -65,7 +66,7 @@ func closedRendererFuncs(theme themes.Theme) groupedlist.Renderers[projects.Proj
 		},
 		Selected: func(project projects.Project, width int) string {
 			fields := []string{
-				icon(project.Status()),
+				icons.Project(project.Status()),
 				lipgloss.NewStyle().Render(runewidth.Truncate(project.Name(), width-paddingHorizontal*2-3, "…")), // need to account for icon and padding
 			}
 
