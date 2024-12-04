@@ -20,7 +20,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/notedownorg/task/pkg/components/groupedlist"
 	"github.com/notedownorg/task/pkg/components/statusbar"
@@ -28,6 +27,7 @@ import (
 	"github.com/notedownorg/task/pkg/listeners"
 	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/notedownorg/task/pkg/views/projectadd"
+	"github.com/notedownorg/task/pkg/views/projectmanager"
 )
 
 const (
@@ -86,14 +86,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.AddProject):
 			return m.ctx.Navigate(projectadd.New(m.ctx, m.nd))
 		case key.Matches(msg, m.keyMap.EditProject):
-			// selected := m.selectedTask()
-			// if selected != nil {
-			// 	return m.ctx.Navigate(m, taskeditor.New(
-			// 		m.ctx,
-			// 		m.nd,
-			// 		taskeditor.WithEdit(*selected, m.date),
-			// 	))
-			// }
+			if selected := m.selectedProject(); selected != nil {
+				return m.ctx.Navigate(projectmanager.New(m.ctx, m.nd, *selected))
+			}
 		case key.Matches(msg, m.keyMap.DeleteProject):
 			if selected := m.selectedProject(); selected != nil {
 				if err := m.nd.DeleteProject(*selected); err != nil {
@@ -143,7 +138,6 @@ func (m *Model) moveUp(n int) {
 	if m.projectlist.Focused() {
 		m.projectlist.MoveUp(n)
 	} else {
-
 		m.closed.MoveUp(n)
 	}
 }
@@ -154,31 +148,4 @@ func (m *Model) moveDown(n int) {
 	} else {
 		m.closed.MoveDown(n)
 	}
-}
-
-func (m *Model) View() string {
-	gap := "   "
-	horizontalPadding := 2
-	verticalPadding := 1
-
-	header := "Projects"
-
-	footer := m.footer.
-		Width(m.ctx.ScreenWidth - horizontalPadding*2).
-		View()
-
-	closed := m.closed.
-		Height(m.ctx.ScreenHeight - h(footer) - h(header) - verticalPadding*2 - 2). // -2 for the gaps
-		Width(m.ctx.ScreenWidth/4 - horizontalPadding*2).
-		View()
-
-	tasklist := m.projectlist.
-		Height(m.ctx.ScreenHeight - h(footer) - h(header) - verticalPadding*2 - 2). // -2 for the gaps
-		Width(m.ctx.ScreenWidth - w(closed) - horizontalPadding*2 - 3).             // -3 for the gap
-		View()
-
-	main := lipgloss.JoinHorizontal(lipgloss.Left, tasklist, gap, closed)
-	panel := lipgloss.JoinVertical(lipgloss.Top, header, gap, main, gap, footer)
-
-	return s().Padding(verticalPadding, horizontalPadding).Render(panel)
 }

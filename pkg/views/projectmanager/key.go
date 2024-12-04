@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package icons
+package projectmanager
 
-import (
-	"log/slog"
+import "github.com/charmbracelet/bubbles/v2/key"
 
-	"github.com/notedownorg/notedown/pkg/providers/tasks"
-)
+type KeyMap struct {
+	ToggleFocus key.Binding
 
-func Task(status tasks.Status) string {
-	switch status {
-	case tasks.Todo:
-		return ""
-	case tasks.Blocked:
-		return ""
-	case tasks.Doing:
-		return ""
-	case tasks.Done:
-		return ""
-	case tasks.Abandoned:
-		return ""
-	default:
-		slog.Warn("unknown task status", "status", status)
-		return " "
-	}
+	CursorUp   key.Binding
+	CursorDown key.Binding
+}
+
+var DefaultKeyMap = KeyMap{
+	ToggleFocus: key.NewBinding(
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "toggle metadata tasks list and completed tasks list"),
+	),
+	CursorUp: key.NewBinding(
+		key.WithKeys("k", "up"),
+		key.WithHelp("↑/k", "move cursor up"),
+	),
+	CursorDown: key.NewBinding(
+		key.WithKeys("j", "down"),
+		key.WithHelp("↓/j", "move cursor down"),
+	),
 }

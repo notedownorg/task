@@ -12,25 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package projectlist
+package colors
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/notedownorg/task/pkg/themes"
 )
 
-var (
-	s = lipgloss.NewStyle
-	w = lipgloss.Width
-	h = lipgloss.Height
-)
-
-func colors(theme themes.Theme, project projects.Project) (bg, fg lipgloss.Color, err error) {
-	switch project.Status() {
+func Project(theme themes.Theme, status projects.Status) (bg, fg lipgloss.Color, err error) {
+	switch status {
 	case projects.Backlog:
 		return theme.Panel, theme.Text, nil
 	case projects.Blocked:
@@ -38,12 +31,12 @@ func colors(theme themes.Theme, project projects.Project) (bg, fg lipgloss.Color
 	case projects.Active:
 		return theme.Panel, theme.Green, nil
 	default:
-		return theme.Panel, theme.Text, fmt.Errorf("unexpected project status %v", project.Status())
+		return theme.Panel, theme.Text, fmt.Errorf("unexpected project status %v", status)
 	}
 }
 
-func selectedColors(theme themes.Theme, project projects.Project) (bg, fg lipgloss.Color, err error) {
-	switch project.Status() {
+func ProjectSelected(theme themes.Theme, status projects.Status) (bg, fg lipgloss.Color, err error) {
+	switch status {
 	case projects.Backlog:
 		return theme.Text, theme.TextCursor, nil
 	case projects.Blocked:
@@ -51,24 +44,6 @@ func selectedColors(theme themes.Theme, project projects.Project) (bg, fg lipglo
 	case projects.Active:
 		return theme.Green, theme.TextCursor, nil
 	default:
-		return theme.Text, theme.TextCursor, fmt.Errorf("unexpected project status %v", project.Status())
-	}
-}
-
-func icon(status projects.Status) string {
-	switch status {
-	case projects.Backlog:
-		return ""
-	case projects.Blocked:
-		return ""
-	case projects.Active:
-		return ""
-	case projects.Archived:
-		return ""
-	case projects.Abandoned:
-		return ""
-	default:
-		slog.Warn("unknown project status", "status", status)
-		return " "
+		return theme.Text, theme.TextCursor, fmt.Errorf("unexpected project status %v", status)
 	}
 }

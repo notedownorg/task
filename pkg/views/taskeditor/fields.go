@@ -21,10 +21,10 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
-	"github.com/notedownorg/task/pkg/components/icons"
 	"github.com/notedownorg/task/pkg/components/pill"
 	"github.com/notedownorg/task/pkg/context"
 	"github.com/notedownorg/task/pkg/model"
+	"github.com/notedownorg/task/pkg/styling/icons"
 )
 
 type Fields struct {
