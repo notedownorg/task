@@ -31,16 +31,4 @@ Type "This task is no longer blocked!"
 Sleep 1
 Enter
 
-# TODO: move this and add task completion to their own feature group
-# Reschedule the unblocked task to tomorrow
-Up
-Sleep 1
-Type "r"
-Sleep 1
-Type "1"
-Sleep 1
-Right
-Sleep 2
-Left
-
 Sleep 5
