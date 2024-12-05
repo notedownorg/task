@@ -36,8 +36,8 @@ var DefaultKeyMap = KeyMap{
 		key.WithHelp("a", "add a new project"),
 	),
 	EditProject: key.NewBinding(
-		key.WithKeys("e"),
-		key.WithHelp("e", "edit a project"),
+		key.WithKeys("e", "enter"),
+		key.WithHelp("e/enter", "edit a project"),
 	),
 	DeleteProject: key.NewBinding(
 		key.WithKeys("d"),

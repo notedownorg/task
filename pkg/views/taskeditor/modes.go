@@ -18,13 +18,14 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/notedownorg/task/pkg/components/statusbar"
 )
 
 type Mode func(*Model)
 
-func WithAdd(status tasks.Status, text string, date time.Time) Mode {
+func WithAddToDaily(status tasks.Status, text string, date time.Time) Mode {
 	return func(m *Model) {
 		// Ensure daily note to write eventual task to
 		d, _, err := m.nd.EnsureDaily(time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC), time.Second*2)
@@ -40,6 +41,20 @@ func WithAdd(status tasks.Status, text string, date time.Time) Mode {
 		m.fields = NewFields(m.ctx)
 		m.location = NewLocation(m.ctx)
 		m.location.SetLocation(d.Path(), -1) // At end
+		m.text.SetCursor(0)
+		m.parseTask()
+	}
+}
+
+func WithAddToProject(status tasks.Status, text string, project projects.Project, date time.Time) Mode {
+	return func(m *Model) {
+		m.mode = adding
+		m.date = date
+		m.status = NewStatus(m.ctx, status).Focus()
+		m.text = NewText(m.ctx).SetValue(text)
+		m.footer = statusbar.New(m.ctx, statusbar.NewMode("add task", statusbar.ActionCreate), m.nd)
+		m.fields = NewFields(m.ctx)
+		m.location = NewLocation(m.ctx).SetLocation(project.Path(), -1) // At end
 		m.text.SetCursor(0)
 		m.parseTask()
 	}

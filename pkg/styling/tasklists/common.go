@@ -32,6 +32,10 @@ func dateBefore(a, b time.Time) bool {
 	return a.Truncate(time.Hour * 24).Before(b.Truncate(time.Hour * 24))
 }
 
+func dateAfter(a, b time.Time) bool {
+	return a.Truncate(time.Hour * 24).After(b.Truncate(time.Hour * 24))
+}
+
 func priority(task tasks.Task) string {
 	if task.Priority() != nil {
 		return fmt.Sprintf(" %d", *task.Priority())

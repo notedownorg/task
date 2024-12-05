@@ -21,6 +21,12 @@ type KeyMap struct {
 
 	CursorUp   key.Binding
 	CursorDown key.Binding
+
+	AddTask        key.Binding
+	EditTask       key.Binding
+	DeleteTask     key.Binding
+	RescheduleTask key.Binding
+	CompleteTask   key.Binding
 }
 
 var DefaultKeyMap = KeyMap{
@@ -35,5 +41,25 @@ var DefaultKeyMap = KeyMap{
 	CursorDown: key.NewBinding(
 		key.WithKeys("j", "down"),
 		key.WithHelp("↓/j", "move cursor down"),
+	),
+	AddTask: key.NewBinding(
+		key.WithKeys("a"),
+		key.WithHelp("a", "add a new task"),
+	),
+	EditTask: key.NewBinding(
+		key.WithKeys("e", "enter"),
+		key.WithHelp("e/enter", "edit the selected task"),
+	),
+	DeleteTask: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "delete the selected task"),
+	),
+	RescheduleTask: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "reschedule the selected task"),
+	),
+	CompleteTask: key.NewBinding(
+		key.WithKeys("x"),
+		key.WithHelp("x", "complete the selected task"),
 	),
 }
