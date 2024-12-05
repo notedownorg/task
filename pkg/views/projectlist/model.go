@@ -37,7 +37,7 @@ const (
 func HandleNew(nd notedown.Client) context.GlobalKeyHandler {
 	return func(ctx *context.ProgramContext, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		key := msg.Key()
-		if key.Mod == tea.ModShift && key.Code == 'p' {
+		if key.Mod == tea.ModCtrl && key.Code == 'p' {
 			return ctx.Navigate(New(ctx, nd))
 		}
 		return nil, nil

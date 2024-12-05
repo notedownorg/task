@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"time"
 
 	cp "github.com/otiai10/copy"
 	"github.com/spf13/pflag"
@@ -75,6 +76,7 @@ func main() {
 				}
 			}
 		}(dir)
+		time.Sleep(1 * time.Second) // spread out the runs to help prevent race conditions
 	}
 
 	wg.Wait()
