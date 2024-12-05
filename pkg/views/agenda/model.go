@@ -104,7 +104,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.ctx.Navigate(taskeditor.New(
 				m.ctx,
 				m.nd,
-				taskeditor.WithAdd(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02")), m.date),
+				taskeditor.WithAddToDaily(tasks.Todo, fmt.Sprintf(" due:%s", m.date.Format("2006-01-02")), m.date),
 			))
 		case key.Matches(msg, m.keyMap.EditTask):
 			if selected := m.selectedTask(); selected != nil {

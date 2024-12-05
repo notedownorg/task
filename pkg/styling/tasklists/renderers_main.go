@@ -110,43 +110,40 @@ func buildRight(selected bool) func(theme themes.Theme, task tasks.Task, dateRet
 	return func(theme themes.Theme, task tasks.Task, dateRetriever func() time.Time, bg lipgloss.Color) string {
 		res := make([]string, 0)
 
-		// Prefer due date over scheduled date as it is definitially more important
 		if task.Due() != nil {
-			due, date := *task.Due(), dateRetriever().Truncate(time.Hour*24)
-			due = due.Truncate(time.Hour * 24)
-			dr := ""
-			if dateBefore(due, date) {
-				if (date.Sub(due) / (24 * time.Hour)) == 1 {
-					dr = "󰃭 Yesterday"
-				} else {
-					dr = "󰃭 " + task.Due().Format("Jan  _2"+dayOfMonthSuffix(due.Day()))
-				}
+			dp := datePrinter(*task.Due(), dateRetriever())
+			fg := theme.TextFaint
+			if dateBefore(*task.Due(), dateRetriever()) {
+				fg = theme.Red
+			} else if dateAfter(*task.Due(), dateRetriever()) {
+				fg = theme.Green
 			}
 			if selected {
-				res = append(res, s().Background(bg).Foreground(theme.TextCursor).Render(dr))
+				res = append(res, s().Background(bg).Foreground(theme.TextCursor).Render(dp))
 			} else {
-				res = append(res, s().Background(bg).Foreground(theme.Red).Render(dr))
-			}
-		} else if task.Scheduled() != nil {
-			scheduled, date := *task.Scheduled(), dateRetriever().Truncate(time.Hour*24)
-			scheduled = scheduled.Truncate(time.Hour * 24)
-			sr := ""
-			if dateBefore(scheduled, date) {
-				if (date.Sub(scheduled) / (24 * time.Hour)) == 1 {
-					sr = "󰃭 Yesterday"
-				} else {
-					sr = "󰃭 " + task.Scheduled().Format("Jan  _2"+dayOfMonthSuffix(scheduled.Day()))
-				}
-			}
-			if selected {
-				res = append(res, s().Background(bg).Foreground(theme.TextCursor).Render(sr))
-			} else {
-				res = append(res, s().Background(bg).Foreground(theme.TextFaint).Render(sr))
+				res = append(res, s().Background(bg).Foreground(fg).Render(dp))
 			}
 		}
 
 		return strings.Join(res, "  ")
 	}
+}
+
+func datePrinter(want, curr time.Time) string {
+	if dateBefore(want, curr) {
+		if (curr.Sub(want) / (24 * time.Hour)) == 1 {
+			return "Yesterday"
+		} else {
+			return want.Format("Jan _2" + dayOfMonthSuffix(want.Day()))
+		}
+	} else if dateAfter(want, curr) {
+		if (want.Sub(curr) / (24 * time.Hour)) == 1 {
+			return "Tomorrow"
+		} else {
+			return want.Format("Jan _2" + dayOfMonthSuffix(want.Day()))
+		}
+	}
+	return "Today"
 }
 
 // See https://github.com/charmbracelet/lipgloss/issues/144 for why we need to pass bg

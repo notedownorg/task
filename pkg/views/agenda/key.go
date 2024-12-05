@@ -63,8 +63,8 @@ var DefaultKeyMap = KeyMap{
 		key.WithHelp("a", "add a new task"),
 	),
 	EditTask: key.NewBinding(
-		key.WithKeys("e"),
-		key.WithHelp("e", "edit the selected task"),
+		key.WithKeys("e", "enter"),
+		key.WithHelp("e/enter", "edit the selected task"),
 	),
 	DeleteTask: key.NewBinding(
 		key.WithKeys("d"),

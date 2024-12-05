@@ -15,6 +15,9 @@
 package projectmanager
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/charmbracelet/bubbles/v2/key"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
@@ -25,6 +28,8 @@ import (
 	"github.com/notedownorg/task/pkg/listeners"
 	"github.com/notedownorg/task/pkg/notedown"
 	"github.com/notedownorg/task/pkg/styling/tasklists"
+	"github.com/notedownorg/task/pkg/views/taskeditor"
+	"github.com/notedownorg/task/pkg/views/taskreschedule"
 )
 
 type Model struct {
@@ -74,6 +79,7 @@ func (m *Model) Init() (tea.Model, tea.Cmd) {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
+	// Internal to the project manager
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -83,9 +89,45 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.moveUp(1)
 		case key.Matches(msg, m.keyMap.CursorDown):
 			m.moveDown(1)
+
+		// Navigation
+		case key.Matches(msg, m.keyMap.AddTask):
+			return m.ctx.Navigate(taskeditor.New(
+				m.ctx,
+				m.nd,
+				taskeditor.WithAddToProject(tasks.Todo, "", m.project, m.ctx.Now()),
+			))
+		case key.Matches(msg, m.keyMap.EditTask):
+			if selected := m.selectedTask(); selected != nil {
+				return m.ctx.Navigate(taskeditor.New(
+					m.ctx,
+					m.nd,
+					taskeditor.WithEdit(*selected, m.ctx.Now()),
+				))
+			}
+
+		// Other Task operations
+		case key.Matches(msg, m.keyMap.RescheduleTask):
+			if selected := m.selectedTask(); selected != nil {
+				return m.ctx.Navigate(taskreschedule.New(m.ctx, m.nd, selected))
+			}
+
+		case key.Matches(msg, m.keyMap.CompleteTask):
+			if selected := m.selectedTask(); selected != nil {
+				t := tasks.NewTaskFromTask(*selected, tasks.WithStatus(tasks.Done, m.ctx.Now()))
+				if err := m.nd.UpdateTask(t); err != nil {
+					m.footer.SetMessage(fmt.Sprintf("error completing task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
+				}
+			}
+
+		case key.Matches(msg, m.keyMap.DeleteTask):
+			if selected := m.selectedTask(); selected != nil {
+				if err := m.nd.DeleteTask(*selected); err != nil {
+					m.footer.SetMessage(fmt.Sprintf("error deleting task: %v", err), time.Now().Add(10*time.Second), m.ctx.Theme.Red)
+				}
+			}
 		}
 	}
-
 	// Handle component events
 	m.status.Update(msg)
 	m.text.Update(msg)
@@ -109,6 +151,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	cmd = tea.Batch(cmd, command)
 	return m, cmd
+}
+
+func (m *Model) selectedTask() *tasks.Task {
+	if m.tasklist.Focused() {
+		return m.tasklist.Selected()
+	}
+	return m.completed.Selected()
 }
 
 // Status -> Text -> TaskList -> Completed
