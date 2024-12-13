@@ -28,9 +28,9 @@ import (
 func TestDue(t *testing.T) {
 	// slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug.Level()})))
 
-	now := time.Now().UTC()
-	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+	now := time.Now()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
 	justBefore := startOfDay.Add(time.Second * -1)
 	justAfter := endOfDay.Add(time.Second)
 	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
@@ -85,9 +85,9 @@ func TestDue(t *testing.T) {
 }
 
 func TestDone(t *testing.T) {
-	now := time.Now().UTC()
-	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+	now := time.Now()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
 	justBefore := startOfDay.Add(time.Second * -1)
 	justAfter := endOfDay.Add(time.Second)
 	dates := []time.Time{justBefore, startOfDay, now, endOfDay, justAfter}
