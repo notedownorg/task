@@ -93,10 +93,11 @@ func (c *ProgramContext) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (c ProgramContext) Now() time.Time {
 	if c.clock == nil {
-		return time.Now().UTC()
+		return time.Now().Local()
 	}
 	return c.clock()
 }
+
 func (c *ProgramContext) onWindowResize(msg tea.WindowSizeMsg) {
 	c.ScreenHeight = msg.Height
 	c.ScreenWidth = msg.Width
