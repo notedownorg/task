@@ -93,7 +93,7 @@ func (c *ProgramContext) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (c ProgramContext) Now() time.Time {
 	if c.clock == nil {
-		return time.Now().Local()
+		return time.Now()
 	}
 	return c.clock()
 }

@@ -44,7 +44,8 @@ func (m *Model) updateTasks() {
 }
 
 func due(nd notedown.Client, date time.Time) []tasks.Task {
-	next := time.Date(date.Year(), date.Month(), date.Day()+1, 0, 0, 0, 0, date.Location()).Add(-time.Second)
+	// Tasks are in UTC, so we need to use that.
+	next := time.Date(date.Year(), date.Month(), date.Day()+1, 0, 0, 0, 0, time.UTC).Add(-time.Second)
 
 	return nd.ListTasks(
 		tasks.FetchAllTasks(),
@@ -65,8 +66,9 @@ func due(nd notedown.Client, date time.Time) []tasks.Task {
 }
 
 func done(nd notedown.Client, date time.Time) []tasks.Task {
-	prev := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	next := time.Date(date.Year(), date.Month(), date.Day()+1, 0, 0, 0, 0, date.Location()).Add(-time.Second)
+	// Tasks are in UTC, so we need to use that.
+	prev := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	next := time.Date(date.Year(), date.Month(), date.Day()+1, 0, 0, 0, 0, time.UTC).Add(-time.Second)
 
 	return nd.ListTasks(
 		tasks.FetchAllTasks(),
